@@ -19,6 +19,17 @@ log.debug('This is a debug message')
 log.info('This is an info message')
 log.warn('This is a warning message', { type: 'missing-item' })
 log.error('This is an error message', { context: { items: ['foo', 'bar'] } })
+
+log.debug(() => {
+  return Promise.resolve('This is a debug message')
+})
+log.info(() => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve('This is an info message')
+    }, 500)
+  })
+})
 ```
 
 ## Configuration
