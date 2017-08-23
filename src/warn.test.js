@@ -31,6 +31,13 @@ describe('src/warn', () => {
     expect(console.warn.args[0], 'to equal', ['{"message":"something"}'])
     expect(console.error.callCount, 'to be', 0)
   })
+  it('logs empty argument', () => {
+    log.warn()
+    expect(console.log.callCount, 'to be', 0)
+    expect(console.warn.callCount, 'to be', 1)
+    expect(console.warn.args[0], 'to equal', ['{}'])
+    expect(console.error.callCount, 'to be', 0)
+  })
   it('logs multiple arguments', () => {
     process.env.LOG_LEVEL = 'INFO'
     log.warn('something', 42, { foo: 'bar' })
@@ -93,12 +100,45 @@ describe('src/warn', () => {
         done()
       })
   })
+  it('logs single argument via function', done => {
+    log
+      .warn(() => {
+        return 'something'
+      })
+      .then(() => {
+        expect(console.log.callCount, 'to be', 0)
+        expect(console.warn.callCount, 'to be', 1)
+        expect(console.warn.args[0], 'to equal', ['{"message":"something"}'])
+        expect(console.error.callCount, 'to be', 0)
+        done()
+      })
+  })
   it('logs single argument via failing promise', done => {
-    process.env.LOG_LEVEL = 'WARN'
     log
       .warn(() => {
         return new Promise((resolve, reject) => {
           reject(new Error('wrah'))
+        })
+      })
+      .then(() => {
+        expect(console.log.callCount, 'to be', 0)
+        expect(console.warn.callCount, 'to be', 1)
+        expect(console.warn.args[0], 'to have length', 1)
+        expect(
+          console.warn.args[0][0],
+          'to match',
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)"\}$/
+        )
+        expect(console.error.callCount, 'to be', 0)
+        done()
+      })
+  })
+  it('logs single argument via exceptional function', done => {
+    log
+      .warn(() => {
+        throw new Error('wrah')
+        return new Promise(resolve => {
+          resolve('something')
         })
       })
       .then(() => {

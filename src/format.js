@@ -1,10 +1,6 @@
 const depthOf = obj => {
   let level = 1
   for (const key in obj) {
-    if (!obj.hasOwnProperty(key)) {
-      continue
-    }
-
     if (typeof obj[key] == 'object') {
       const depth = depthOf(obj[key]) + 1
       level = Math.max(depth, level)
