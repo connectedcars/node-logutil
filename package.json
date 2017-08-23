@@ -4,8 +4,8 @@
   "description": "Simple log formatting for Node",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha \"src/**/*.test.js\"",
-    "coverage": "istanbul cover node_modules/.bin/_mocha -- \"src/**/*.test.js\""
+    "test": "nyc --reporter=lcov --reporter=text mocha \"src/**/*.test.js\"",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
     "type": "git",
@@ -22,11 +22,12 @@
   "homepage": "https://github.com/connectedcars/node-logutil#readme",
   "devDependencies": {
     "babel-eslint": "^7.2.3",
+    "coveralls": "^2.13.1",
     "eslint": "^4.5.0",
     "eslint-config-prettier": "^2.3.0",
     "eslint-plugin-prettier": "^2.2.0",
-    "istanbul": "^0.4.5",
     "mocha": "^3.5.0",
+    "nyc": "^11.1.0",
     "prettier": "^1.5.3",
     "sinon": "^3.2.1",
     "unexpected": "^10.33.2"
