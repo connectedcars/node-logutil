@@ -6,12 +6,14 @@ describe('src/error', () => {
   beforeEach(() => {
     this.oldLogLevel = process.env.LOG_LEVEL
     delete process.env.LOG_LEVEL
+    this.clock = sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
     sinon.spy(console, 'log')
-    sinon.stub(console, 'warn')
-    sinon.spy(console, 'error')
+    sinon.spy(console, 'warn')
+    sinon.stub(console, 'error')
   })
   afterEach(() => {
     process.env.LOG_LEVEL = this.oldLogLevel
+    this.clock.restore()
     console.log.restore()
     console.warn.restore()
     console.error.restore()
@@ -22,14 +24,18 @@ describe('src/error', () => {
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 1)
-    expect(console.error.args[0], 'to equal', ['{"message":"something"}'])
+    expect(console.error.args[0], 'to equal', [
+      '{"message":"something","level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+    ])
   })
   it('logs empty argument', () => {
     log.error()
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 1)
-    expect(console.error.args[0], 'to equal', ['{}'])
+    expect(console.error.args[0], 'to equal', [
+      '{"level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+    ])
   })
   it('logs multiple arguments', () => {
     process.env.LOG_LEVEL = 'INFO'
@@ -38,7 +44,7 @@ describe('src/error', () => {
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 1)
     expect(console.error.args[0], 'to equal', [
-      '{"message":"something","data":[42,{"foo":"bar"}]}'
+      '{"message":"something","data":[42,{"foo":"bar"}],"level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
   })
   it('logs multiple times', () => {
@@ -49,11 +55,15 @@ describe('src/error', () => {
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 3)
-    expect(console.error.args[0], 'to equal', ['{"message":"something"}'])
-    expect(console.error.args[1], 'to equal', [
-      '{"message":"something else","data":[42]}'
+    expect(console.error.args[0], 'to equal', [
+      '{"message":"something","level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
-    expect(console.error.args[2], 'to equal', ['{"foo":true}'])
+    expect(console.error.args[1], 'to equal', [
+      '{"message":"something else","data":[42],"level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+    ])
+    expect(console.error.args[2], 'to equal', [
+      '{"foo":true,"level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+    ])
   })
 
   it('logs single argument via promise', done => {
@@ -71,7 +81,9 @@ describe('src/error', () => {
         expect(console.log.callCount, 'to be', 0)
         expect(console.warn.callCount, 'to be', 0)
         expect(console.error.callCount, 'to be', 1)
-        expect(console.error.args[0], 'to equal', ['{"message":"something"}'])
+        expect(console.error.args[0], 'to equal', [
+          '{"message":"something","level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+        ])
         done()
       })
   })
@@ -84,7 +96,9 @@ describe('src/error', () => {
         expect(console.log.callCount, 'to be', 0)
         expect(console.warn.callCount, 'to be', 0)
         expect(console.error.callCount, 'to be', 1)
-        expect(console.error.args[0], 'to equal', ['{"message":"something"}'])
+        expect(console.error.args[0], 'to equal', [
+          '{"message":"something","level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+        ])
         done()
       })
   })
@@ -103,7 +117,7 @@ describe('src/error', () => {
         expect(
           console.error.args[0][0],
           'to match',
-          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)"\}$/
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","level":"ERROR","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
         )
         done()
       })
@@ -124,7 +138,7 @@ describe('src/error', () => {
         expect(
           console.error.args[0][0],
           'to match',
-          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)"\}$/
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","level":"ERROR","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
         )
         done()
       })

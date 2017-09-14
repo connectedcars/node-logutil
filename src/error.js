@@ -1,4 +1,4 @@
-const { logLevels } = require('./env')
+const { logLevels } = require('./levels')
 const log = require('./log')
 
 module.exports = (...args) => {

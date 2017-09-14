@@ -1,7 +1,7 @@
 const expect = require('unexpected')
-const { logLevels, getLogLevel } = require('./env')
+const { logLevels, getLogLevel, getLogLevelName } = require('./levels')
 
-describe('src/env', () => {
+describe('src/levels', () => {
   describe('getLogLevel', () => {
     beforeEach(() => {
       this.oldLogLevel = process.env.LOG_LEVEL
@@ -41,6 +41,26 @@ describe('src/env', () => {
     it('has environment set to mixed case', () => {
       process.env.LOG_LEVEL = 'Warn'
       expect(getLogLevel(), 'to be', logLevels.WARN)
+    })
+  })
+  describe('getLogLevelName', () => {
+    it('gets ERROR', () => {
+      expect(getLogLevelName(40), 'to be', 'ERROR')
+    })
+    it('gets WARN', () => {
+      expect(getLogLevelName(30), 'to be', 'WARN')
+    })
+    it('gets INFO', () => {
+      expect(getLogLevelName(20), 'to be', 'INFO')
+    })
+    it('gets DEBUG', () => {
+      expect(getLogLevelName(10), 'to be', 'DEBUG')
+    })
+    it('gets UNKNOWN for invalid level', () => {
+      expect(getLogLevelName(1337), 'to be', 'UNKNOWN')
+    })
+    it('gets UNKNOWN for no level', () => {
+      expect(getLogLevelName(), 'to be', 'UNKNOWN')
     })
   })
 })

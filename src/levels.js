@@ -14,7 +14,19 @@ const getLogLevel = () => {
   return logLevels.WARN
 }
 
+const getLogLevelName = logLevel => {
+  let level = 'UNKNOWN'
+  for (const key in logLevels) {
+    if (logLevel === logLevels[key]) {
+      level = key
+      break
+    }
+  }
+  return level
+}
+
 module.exports = {
   logLevels,
-  getLogLevel
+  getLogLevel,
+  getLogLevelName
 }

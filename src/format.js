@@ -1,3 +1,5 @@
+const { getLogLevelName } = require('./levels')
+
 const depthOf = obj => {
   let level = 1
   for (const key in obj) {
@@ -9,7 +11,7 @@ const depthOf = obj => {
   return level
 }
 
-module.exports = (...args) => {
+module.exports = (level, ...args) => {
   let output = {
     message: '',
     context: {},
@@ -58,6 +60,10 @@ module.exports = (...args) => {
     // Remove empty data
     delete output.data
   }
+  // Add level
+  output.level = getLogLevelName(level)
+  // Add timestamp
+  output.timestamp = new Date().toISOString()
   // Stringify output
   const blob = JSON.stringify(output)
   // Check for size being less than than 100 KB

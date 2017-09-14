@@ -1,8 +1,8 @@
-const { logLevels, getLogLevel } = require('./env')
+const { logLevels, getLogLevel } = require('./levels')
 const format = require('./format')
 
 const doLog = (level, ...args) => {
-  const output = format(...args)
+  const output = format(level, ...args)
   switch (level) {
     case logLevels.ERROR:
       console.error(output)
