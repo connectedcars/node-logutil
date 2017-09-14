@@ -2,6 +2,7 @@ const logLevels = {
   ERROR: 40,
   WARN: 30,
   INFO: 20,
+  STATISTIC: 15,
   DEBUG: 10
 }
 
