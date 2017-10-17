@@ -96,7 +96,7 @@ module.exports = (level, ...args) => {
     // keep track of object values, so we know if they occur twice (circular reference)
     let seenValues = []
 
-    var valueChecker = function(objValue) {
+    var valueChecker = function(objKey, objValue) {
       if (objValue !== null && typeof objValue === 'object') {
         if (seenValues.indexOf(objValue) > -1) {
           // let it be logged that there was something sanitized
