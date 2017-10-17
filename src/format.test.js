@@ -219,4 +219,17 @@ describe('src/format', () => {
       '{"message":"Depth limited {\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":\\"value\\"}}}}}}}}}}},\\"level\\":\\"WARN\\",\\"timestamp\\":\\"2017-09-01T13:37:42.000Z\\"}"}'
     )
   })
+
+  it('formats an object containing a circular reference', () => {
+    var topLevel = {
+      normalProperty: 'expected value'
+    }
+    topLevel.circular = topLevel
+
+    expect(
+      format(logLevels.WARN, topLevel),
+      'to be',
+      '{"normalProperty":"expected value","circular":{"normalProperty":"expected value","circular":"[Circular:StrippedOut]"},"level":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+    )
+  })
 })
