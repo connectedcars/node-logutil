@@ -80,6 +80,7 @@ module.exports = (level, ...args) => {
         // Wrap deep objects in a string
         return JSON.stringify({ message: 'Depth limited ' + blob })
       }
+      // not over nesting limit or length limit
       return blob
     }
     // Truncate stringified output to 100 KB
@@ -111,7 +112,23 @@ module.exports = (level, ...args) => {
         return objValue
       }
 
-      return JSON.stringify(output, valueChecker)
+      let returnBlob = JSON.stringify(output, valueChecker)
+
+      // still we want to curtail too long logs
+      if (returnBlob.length >= 100 * 1024) {
+        const truncated = returnBlob.substring(0, 100 * 1024)
+        // Wrap truncated output in a string
+        return JSON.stringify({ message: 'Truncated ' + truncated })
+      }
+
+      // but what if it is still too long?
+      if (depthOf(JSON.parse(returnBlob)) > 10) {
+        return JSON.stringify({
+          message: 'Depth limited ' + returnBlob
+        })
+      }
+
+      return returnBlob
     } else {
       // it isn't an error we know how to handle
       throw err
