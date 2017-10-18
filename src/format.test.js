@@ -285,4 +285,16 @@ describe('src/format', () => {
       110 * 1024
     )
   })
+
+  it('still throws unknown errors', () => {
+    var sandbox = sinon.sandbox.create()
+
+    sandbox.stub(JSON, 'stringify').throws()
+
+    expect(() => {
+      format(logLevels.WARN, { data: 'fake' })
+    }, 'to throw')
+
+    sandbox.restore()
+  })
 })
