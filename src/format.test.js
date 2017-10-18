@@ -219,4 +219,82 @@ describe('src/format', () => {
       '{"message":"Depth limited {\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":\\"value\\"}}}}}}}}}}},\\"level\\":\\"WARN\\",\\"timestamp\\":\\"2017-09-01T13:37:42.000Z\\"}"}'
     )
   })
+
+  it('formats an object containing a circular reference', () => {
+    var topLevel = {
+      normalProperty: 'expected value'
+    }
+    topLevel.circular = topLevel
+
+    expect(
+      format(logLevels.WARN, topLevel),
+      'to be',
+      '{"normalProperty":"expected value","circular":{"normalProperty":"expected value","circular":"[Circular:StrippedOut]"},"level":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+    )
+  })
+
+  it('formats a circular object with too deep nesting', () => {
+    var nestedObj = {
+      nested: {
+        nested: {
+          nested: {
+            nested: {
+              nested: {
+                nested: {
+                  nested: {
+                    nested: {
+                      nested: { nested: { nested: { nested: 'value' } } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    nestedObj.circular = nestedObj
+    expect(
+      format(logLevels.WARN, nestedObj),
+      'to be',
+      '{"message":"Depth limited {\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":\\"value\\"}}}}}}}}}}},\\"circular\\":{\\"nested\\":\\"[Circular:StrippedOut]\\",\\"circular\\":\\"[Circular:StrippedOut]\\"},\\"level\\":\\"WARN\\",\\"timestamp\\":\\"2017-09-01T13:37:42.000Z\\"}"}'
+    )
+  })
+
+  it('formats a circular object with too long a message', () => {
+    let blob = ''
+    for (let i = 0; i < 1024; i++) {
+      blob += 'something!'
+    }
+    let msg = ''
+    for (let i = 0; i < 110; i++) {
+      msg += blob
+    }
+    var obj = {}
+    obj.message = msg
+    obj.circular = obj
+
+    expect(
+      format(logLevels.WARN, obj),
+      'to match',
+      /^\{"message":"Truncated \{\\\"message\\\":\\\"(something!){10200,}somethin"\}$/
+    )
+    expect(
+      format(logLevels.WARN, msg).length,
+      'to be less than or equal to',
+      110 * 1024
+    )
+  })
+
+  it('still throws unknown errors', () => {
+    var sandbox = sinon.sandbox.create()
+
+    sandbox.stub(JSON, 'stringify').throws()
+
+    expect(() => {
+      format(logLevels.WARN, { data: 'fake' })
+    }, 'to throw')
+
+    sandbox.restore()
+  })
 })
