@@ -1,5 +1,8 @@
 const { getLogLevelName } = require('./levels')
 
+const maxNestedDepth = 10
+const maxTextLength = 100 * 1024
+
 const depthOf = obj => {
   let level = 1
   for (const key in obj) {
@@ -9,6 +12,17 @@ const depthOf = obj => {
     }
   }
   return level
+}
+
+const depthLimited = contents => {
+  return JSON.stringify({
+    message: 'Depth limited ' + contents
+  })
+}
+
+const lengthLimited = contents => {
+  let truncated = contents.substring(0, maxTextLength)
+  return JSON.stringify({ message: 'Truncated ' + truncated })
 }
 
 module.exports = (level, ...args) => {
@@ -74,19 +88,18 @@ module.exports = (level, ...args) => {
     // Stringify output
     const blob = JSON.stringify(output)
     // Check for size being less than than 100 KB
-    if (blob.length <= 100 * 1024) {
+    if (blob.length <= maxTextLength) {
       // Check for depth above 10
-      if (depthOf(output) > 10) {
+      if (depthOf(output) > maxNestedDepth) {
         // Wrap deep objects in a string
-        return JSON.stringify({ message: 'Depth limited ' + blob })
+        return depthLimited(blob)
       }
       // not over nesting limit or length limit
       return blob
     }
-    // Truncate stringified output to 100 KB
-    const truncated = blob.substring(0, 100 * 1024)
+    // Truncate stringified output to 100 KB &
     // Wrap truncated output in a string
-    return JSON.stringify({ message: 'Truncated ' + truncated })
+    return lengthLimited(blob)
   } catch (err) {
     if (err.message === 'Converting circular structure to JSON') {
       /*
@@ -115,19 +128,23 @@ module.exports = (level, ...args) => {
       let returnBlob = JSON.stringify(output, valueChecker)
 
       // still we want to curtail too long logs
-      if (returnBlob.length >= 100 * 1024) {
-        const truncated = returnBlob.substring(0, 100 * 1024)
+      if (returnBlob.length >= maxTextLength) {
         // Wrap truncated output in a string
-        return JSON.stringify({ message: 'Truncated ' + truncated })
+        return lengthLimited(returnBlob)
       }
 
       // but what if it is still too long?
-      if (depthOf(JSON.parse(returnBlob)) > 10) {
-        return JSON.stringify({
-          message: 'Depth limited ' + returnBlob
-        })
+      /*
+      don't check depth on the original object 
+      which contains circular references. Parse 
+      the santisized down object back to an 
+      object to count object depth
+      */
+      if (depthOf(JSON.parse(returnBlob)) > maxNestedDepth) {
+        return depthLimited(returnBlob)
       }
 
+      // the object wasn't too long or too nested, return the stringified object
       return returnBlob
     } else {
       // it isn't an error we know how to handle
