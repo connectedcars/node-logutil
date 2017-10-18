@@ -87,29 +87,34 @@ module.exports = (level, ...args) => {
     // Wrap truncated output in a string
     return JSON.stringify({ message: 'Truncated ' + truncated })
   } catch (err) {
-    /*
-    we have caught an exception, we assume it is 
-    a circular reference and parse through the 
-    object while keeping track of elements occuring twice
-    */
+    if (err.message === 'Converting circular structure to JSON') {
+      /*
+      it is a circular reference and parse 
+      through the object while keeping track 
+      of elements occuring twice
+      */
 
-    // keep track of object values, so we know if they occur twice (circular reference)
-    let seenValues = []
+      // keep track of object values, so we know if they occur twice (circular reference)
+      let seenValues = []
 
-    var valueChecker = function(objKey, objValue) {
-      if (objValue !== null && typeof objValue === 'object') {
-        if (seenValues.indexOf(objValue) > -1) {
-          // let it be logged that there was something sanitized
-          return '[Circular:StrippedOut]'
-        } else {
-          // track that we have 'seen' it
-          seenValues.push(objValue)
+      var valueChecker = function(objKey, objValue) {
+        if (objValue !== null && typeof objValue === 'object') {
+          if (seenValues.indexOf(objValue) > -1) {
+            // let it be logged that there was something sanitized
+            return '[Circular:StrippedOut]'
+          } else {
+            // track that we have 'seen' it
+            seenValues.push(objValue)
+          }
         }
+        // first time seeing it, return and proceed to next value
+        return objValue
       }
-      // first time seeing it, return and proceed to next value
-      return objValue
-    }
 
-    return JSON.stringify(output, valueChecker)
+      return JSON.stringify(output, valueChecker)
+    } else {
+      // it isn't an error we know how to handle
+      throw err
+    }
   }
 }
