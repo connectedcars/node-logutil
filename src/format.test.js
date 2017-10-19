@@ -1,7 +1,7 @@
 const expect = require('unexpected')
 const sinon = require('sinon')
 const { logLevels } = require('./levels')
-const format = require('./format')
+const { format, reachedMaxDepth } = require('./format')
 
 describe('src/format', () => {
   beforeEach(() => {
@@ -296,5 +296,63 @@ describe('src/format', () => {
     }, 'to throw')
 
     sandbox.restore()
+  })
+
+  it('gets to the bottom of a not too nested object', () => {
+    let normalObject = {
+      1: {
+        2: {
+          3: {
+            4: {
+              5: {
+                6: {
+                  7: {
+                    8: {
+                      9: 'not too deep'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    expect(reachedMaxDepth(normalObject), 'to be', false)
+  })
+
+  it('cuts itself of at a certain depth of nested objects', () => {
+    let deepObject = {
+      1: {
+        2: {
+          3: {
+            4: {
+              5: {
+                6: {
+                  7: {
+                    8: {
+                      9: {
+                        10: {
+                          11: {
+                            12: {
+                              13: {
+                                14: {
+                                  15: 'too deep'
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    expect(reachedMaxDepth(deepObject), 'to be', true)
   })
 })

@@ -1,5 +1,5 @@
 const { logLevels, getLogLevel } = require('./levels')
-const format = require('./format')
+const { format } = require('./format')
 
 const doLog = (level, ...args) => {
   const output = format(level, ...args)

@@ -1,17 +1,16 @@
 const { getLogLevelName } = require('./levels')
 
-const maxNestedDepth = 10
-const maxTextLength = 100 * 1024
+const MAX_NESTED_DEPTH = 10
+const MAX_TEXT_LENGTH = 100 * 1024
 
-const depthOf = obj => {
-  let level = 1
+const reachedMaxDepth = (obj, level = 0) => {
   for (const key in obj) {
     if (typeof obj[key] == 'object') {
-      const depth = depthOf(obj[key]) + 1
-      level = Math.max(depth, level)
+      level = level + 1
+      return level > MAX_NESTED_DEPTH || reachedMaxDepth(obj[key], level)
     }
   }
-  return level
+  return false
 }
 
 const depthLimited = contents => {
@@ -21,11 +20,11 @@ const depthLimited = contents => {
 }
 
 const lengthLimited = contents => {
-  let truncated = contents.substring(0, maxTextLength)
+  let truncated = contents.substring(0, MAX_TEXT_LENGTH)
   return JSON.stringify({ message: 'Truncated ' + truncated })
 }
 
-module.exports = (level, ...args) => {
+const format = (level, ...args) => {
   let output = {
     message: '',
     context: {},
@@ -88,9 +87,9 @@ module.exports = (level, ...args) => {
     // Stringify output
     const blob = JSON.stringify(output)
     // Check for size being less than than 100 KB
-    if (blob.length <= maxTextLength) {
+    if (blob.length <= MAX_TEXT_LENGTH) {
       // Check for depth above 10
-      if (depthOf(output) > maxNestedDepth) {
+      if (reachedMaxDepth(output)) {
         // Wrap deep objects in a string
         return depthLimited(blob)
       }
@@ -128,7 +127,7 @@ module.exports = (level, ...args) => {
       let returnBlob = JSON.stringify(output, valueChecker)
 
       // still we want to curtail too long logs
-      if (returnBlob.length >= maxTextLength) {
+      if (returnBlob.length >= MAX_TEXT_LENGTH) {
         // Wrap truncated output in a string
         return lengthLimited(returnBlob)
       }
@@ -140,7 +139,7 @@ module.exports = (level, ...args) => {
       the santisized down object back to an 
       object to count object depth
       */
-      if (depthOf(JSON.parse(returnBlob)) > maxNestedDepth) {
+      if (reachedMaxDepth(JSON.parse(returnBlob))) {
         return depthLimited(returnBlob)
       }
 
@@ -151,4 +150,10 @@ module.exports = (level, ...args) => {
       throw err
     }
   }
+}
+
+module.exports = {
+  format,
+  reachedMaxDepth,
+  MAX_NESTED_DEPTH
 }
