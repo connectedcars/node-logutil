@@ -154,6 +154,5 @@ const format = (level, ...args) => {
 
 module.exports = {
   format,
-  reachedMaxDepth,
-  MAX_NESTED_DEPTH
+  reachedMaxDepth
 }
