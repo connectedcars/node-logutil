@@ -6,7 +6,7 @@ const MAX_TEXT_LENGTH = 100 * 1024
 const reachedMaxDepth = (obj, level = 0) => {
   for (const key in obj) {
     if (typeof obj[key] == 'object') {
-      level = level + 1
+      level++
       return level > MAX_NESTED_DEPTH || reachedMaxDepth(obj[key], level)
     }
   }
