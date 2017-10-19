@@ -8,7 +8,7 @@ Simple log formatting for Node 6.x and 8.x
 ## Installation
 
 ``` javascript
-npm install https://github.com/connectedcars/node-logutil#v1.1.1
+npm install https://github.com/connectedcars/node-logutil#v1.1.2
 ```
 
 ## API
