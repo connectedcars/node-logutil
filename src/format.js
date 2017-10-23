@@ -14,14 +14,19 @@ const reachedMaxDepth = (obj, level = 0) => {
 }
 
 const depthLimited = contents => {
-  return JSON.stringify({
+  return stripStringify({
     message: 'Depth limited ' + contents
   })
 }
 
 const lengthLimited = contents => {
   let truncated = contents.substring(0, MAX_TEXT_LENGTH)
-  return JSON.stringify({ message: 'Truncated ' + truncated })
+  return stripStringify({ message: 'Truncated ' + truncated })
+}
+
+const stripStringify = (mixedContent, walkerFunction) => {
+  // this stops logs with multiline content being split into seperate entries on gcloud
+  return JSON.stringify(mixedContent, walkerFunction).replace(/\\n/g, '\\n')
 }
 
 const format = (level, ...args) => {
@@ -85,7 +90,7 @@ const format = (level, ...args) => {
     // Add timestamp
     output.timestamp = new Date().toISOString()
     // Stringify output
-    const blob = JSON.stringify(output)
+    const blob = stripStringify(output)
     // Check for size being less than than 100 KB
     if (blob.length <= MAX_TEXT_LENGTH) {
       // Check for depth above 10
@@ -124,7 +129,7 @@ const format = (level, ...args) => {
         return objValue
       }
 
-      let returnBlob = JSON.stringify(output, valueChecker)
+      let returnBlob = stripStringify(output, valueChecker)
 
       // still we want to curtail too long logs
       if (returnBlob.length >= MAX_TEXT_LENGTH) {

@@ -355,4 +355,20 @@ describe('src/format', () => {
     }
     expect(reachedMaxDepth(deepObject), 'to be', true)
   })
+
+  it('stores muliline messages as expected', () => {
+    const countQuery = `
+      SELECT
+        ( SELECT COUNT(*) FROM messages
+          WHERE (senderId = :userId OR receiverId = :userId) AND workshopId = :workshopId
+        ) AS count1,
+
+        ( SELECT COUNT(*) FROM UserActivities
+          WHERE (userId = :userId) ''}
+        ) AS count2
+    `
+    const expectedLogOutput = `{"message":"\\n      SELECT\\n        ( SELECT COUNT(*) FROM messages\\n          WHERE (senderId = :userId OR receiverId = :userId) AND workshopId = :workshopId\\n        ) AS count1,\\n\\n        ( SELECT COUNT(*) FROM UserActivities\\n          WHERE (userId = :userId) ''}\\n        ) AS count2\\n    ","level":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}`
+
+    expect(format(logLevels.WARN, countQuery), 'to be', expectedLogOutput)
+  })
 })
