@@ -8,6 +8,6 @@ charset = utf-8
 indent_style = space
 indent_size = 2
 
-[{package.json,*.yml,*.cjson}]
+[{package.json,*.yml,*.cjson,*.md}]
 indent_style = space
 indent_size = 2

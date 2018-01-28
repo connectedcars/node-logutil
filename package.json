@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/connectedcars/node-logutil#readme",
   "devDependencies": {
+    "@types/mocha": "^2.2.47",
+    "@types/node": "^9.4.0",
     "babel-eslint": "^7.2.3",
     "coveralls": "^2.13.1",
     "eslint": "^4.5.0",
@@ -31,5 +33,6 @@
     "prettier": "^1.5.3",
     "sinon": "^3.2.1",
     "unexpected": "^10.33.2"
-  }
+  },
+  "dependencies": {}
 }
