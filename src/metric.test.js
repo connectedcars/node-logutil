@@ -4,12 +4,13 @@ const sinon = require('sinon')
 
 describe('src/metric.js', () => {
   beforeEach(() => {
-    this.cumulative = sinon.spy(MetricRegistry.prototype, 'cumulative')
-
+    this.createKey = sinon.spy(MetricRegistry.prototype, 'createKey')
+    this.clock = sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
     this.metricRegistry = new MetricRegistry()
   })
   afterEach(async () => {
-    this.cumulative.restore()
+    this.clock.restore()
+    this.createKey.restore()
   })
 
   it('creates cumulative metrics', async () => {
@@ -18,7 +19,7 @@ describe('src/metric.js', () => {
     const name = 'my-metric'
     const labels = { brand: 'vw' }
 
-    for (let i = 1; i < 4; i++) {
+    for (let i = 1; i <= 4; i++) {
       await this.metricRegistry.cumulative(name, value, labels)
 
       expect(
@@ -33,6 +34,9 @@ describe('src/metric.js', () => {
         }
       )
     }
+
+    expect(this.createKey.callCount, 'to be', 4)
+    expect(this.createKey.args[0], 'to equal', [name, labels])
   })
 
   it('creates gauge metric', async () => {
@@ -57,26 +61,38 @@ describe('src/metric.js', () => {
     const anotherKey = 'gauge-metric:foo'
     expect(this.metricRegistry.metrics, 'to have key', anotherKey)
     expect(this.metricRegistry.metrics[anotherKey].value, 'to be', 80)
+
+    expect(this.createKey.callCount, 'to be', 7)
+    expect(this.createKey.args[0], 'to equal', [name, labels])
   })
 
   it('dumps all metrics', async () => {
-    const name = 'abc'
+    this.metricRegistry.gauge('abc', 2, null)
+    this.metricRegistry.gauge('foo', 4, { a: 'b' })
 
-    const key = 'abc'
-    const labels = null
-    const value = 2
-    this.metricRegistry.gauge(name, value, labels)
+    const actualMetric = await this.metricRegistry.getMetrics()
+    expect(actualMetric[0], 'to equal', {
+      name: 'abc',
+      type: 'GAUGE',
+      value: 2,
+      labels: null,
+      startTime: 1504273062000,
+      endTime: 1504273062000
+    })
+    expect(actualMetric[1], 'to equal', {
+      name: 'foo',
+      type: 'GAUGE',
+      value: 4,
+      labels: { a: 'b' },
+      startTime: 1504273062000,
+      endTime: 1504273062000
+    })
+  })
 
-    const actualMetric = (await this.metricRegistry.getMetrics()).filter(
-      m => m.name === key && m.labels === labels
-    )[0]
-    expect(actualMetric, 'to only have keys', [
-      'name',
-      'value',
-      'labels',
-      'startTime',
-      'endTime',
-      'type'
-    ])
+  it('creates the correct prometheus format', async () => {
+    this.metricRegistry.gauge('abc', 2, null)
+    this.metricRegistry.gauge('foo', 4, { brand: 'vw' })
+    const actualMetric = await this.metricRegistry.getPrometheusMetrics()
+    expect(actualMetric, 'to equal', ['abc 2', "foo{brand='vw'} 4"])
   })
 })
