@@ -27,16 +27,24 @@ class MetricRegistry {
     const result = []
     for (let key of Object.keys(this.metrics)) {
       const metric = this.metrics[key]
-      const labels = Object.keys(metric.labels).map(k => `${k}='${metric[k]}'`)
+
+      let labelsFormatted = ''
+
+      if (metric.labels) {
+        labelsFormatted = Object.keys(metric.labels)
+          .map(k => `${k}='${metric.labels[k]}'`)
+          .join(',')
+        labelsFormatted = `{${labelsFormatted}}`
+      }
 
       switch (metric.type) {
         case metricTypes.GAUGE: {
-          result.push(`${metric.name}{${labels.join(',')}} ${metric.value}`)
+          result.push(`${metric.name}${labelsFormatted} ${metric.value}`)
           break
         }
         case metricTypes.CUMULATIVE: {
           result.push(
-            `${metric.name}{${labels.join(',')}} ${metric.value} ${Date.now()}`
+            `${metric.name}${labelsFormatted} ${metric.value} ${Date.now()}`
           )
           break
         }
