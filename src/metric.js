@@ -1,93 +1,86 @@
 const statistic = require('./statistic')
-let metrics = {}
 
 const metricTypes = {
   GAUGE: 'GAUGE',
   CUMULATIVE: 'CUMULATIVE'
 }
 
-async function logMetrics() {
-  for (let key of Object.values(metrics)) {
-    statistic({ ...metrics[key], endTime: Date.now() })
+class MetricRegistry {
+  constructor() {
+    this.metrics = {}
   }
-}
-
-async function getMetrics() {
-  let result = []
-
-  for (let key of Object.keys(metrics)) {
-    result.push({ ...metrics[key], endTime: Date.now() })
-  }
-
-  return result
-}
-
-async function getPrometheusMetrics() {
-  const result = []
-  for (let key of Object.keys(metrics)) {
-    const metric = metrics[key]
-    const labels = Object.keys(metric.labels).map(k => `${k}='${metric[k]}'`)
-
-    switch (metric.type) {
-      case metricTypes.GAUGE: {
-        result.push(`${metric.name}{${labels.join(',')}} ${metric.value}`)
-        break
-      }
-      case metricTypes.CUMULATIVE: {
-        result.push(
-          `${metric.name}{${labels.join(',')}} ${metric.value} ${Date.now()}`
-        )
-        break
-      }
-      default: {
-        continue
-      }
+  async logMetrics() {
+    for (let key of Object.values(this.metrics)) {
+      statistic({ ...this.metrics[key], endTime: Date.now() })
     }
   }
-  return result
-}
+  async getMetrics() {
+    let result = []
 
-async function gauge(name, value, labels) {
-  const key = labels ? [name, ...Object.values(labels)].join(':') : name
-
-  if (!metrics[key]) {
-    metrics[key] = {
-      name: name,
-      type: metricTypes.GAUGE,
-      value: value,
-      labels: labels,
-      startTime: Date.now()
+    for (let key of Object.keys(this.metrics)) {
+      result.push({ ...this.metrics[key], endTime: Date.now() })
     }
-  } else {
-    metrics[key].value = value
+
+    return result
   }
-}
+  async getPrometheusMetrics() {
+    const result = []
+    for (let key of Object.keys(this.metrics)) {
+      const metric = this.metrics[key]
+      const labels = Object.keys(metric.labels).map(k => `${k}='${metric[k]}'`)
 
-async function cumulative(name, value, labels) {
-  const key = labels ? [name, ...Object.values(labels)].join(':') : name
+      switch (metric.type) {
+        case metricTypes.GAUGE: {
+          result.push(`${metric.name}{${labels.join(',')}} ${metric.value}`)
+          break
+        }
+        case metricTypes.CUMULATIVE: {
+          result.push(
+            `${metric.name}{${labels.join(',')}} ${metric.value} ${Date.now()}`
+          )
+          break
+        }
+        default: {
+          continue
+        }
+      }
+    }
+    return result
+  }
 
-  if (!metrics[key]) {
-    metrics[key] = {
-      name: name,
-      type: metricTypes.CUMULATIVE,
-      value: 0,
-      labels: labels,
-      startTime: Date.now()
+  async gauge(name, value, labels) {
+    const key = labels ? [name, ...Object.values(labels)].join(':') : name
+
+    if (!this.metrics[key]) {
+      this.metrics[key] = {
+        name: name,
+        type: metricTypes.GAUGE,
+        value: value,
+        labels: labels,
+        startTime: Date.now()
+      }
+    } else {
+      this.metrics[key].value = value
     }
   }
+  async cumulative(name, value, labels) {
+    const key = labels ? [name, ...Object.values(labels)].join(':') : name
 
-  metrics[key].value += value
-}
+    if (!this.metrics[key]) {
+      this.metrics[key] = {
+        name: name,
+        type: metricTypes.CUMULATIVE,
+        value: 0,
+        labels: labels,
+        startTime: Date.now()
+      }
+    }
 
-function resetMetrics() {
-  metrics = {}
+    this.metrics[key].value += value
+  }
 }
 
 module.exports = {
-  cumulative,
-  gauge,
-  getMetrics,
-  getPrometheusMetrics,
-  logMetrics,
-  metrics
+  MetricRegistry,
+  metricTypes
 }

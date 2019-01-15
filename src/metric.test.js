@@ -1,9 +1,16 @@
 const expect = require('unexpected')
-const metric = require('./metric')
+const { MetricRegistry } = require('./metric')
+const sinon = require('sinon')
 
 describe('src/metric.js', () => {
-  beforeEach(() => {})
-  afterEach(async () => {})
+  beforeEach(() => {
+    this.cumulative = sinon.spy(MetricRegistry.prototype, 'cumulative')
+
+    this.metricRegistry = new MetricRegistry()
+  })
+  afterEach(async () => {
+    this.cumulative.restore()
+  })
 
   it('creates cumulative metrics', async () => {
     let value = 10
@@ -12,10 +19,10 @@ describe('src/metric.js', () => {
     const labels = { brand: 'vw' }
 
     for (let i = 1; i < 4; i++) {
-      await metric.cumulative(name, value, labels)
+      await this.metricRegistry.cumulative(name, value, labels)
 
       expect(
-        { ...metric.metrics['my-metric:vw'], startTime: null },
+        { ...this.metricRegistry.metrics['my-metric:vw'], startTime: null },
         'to equal',
         {
           name: name,
@@ -33,19 +40,23 @@ describe('src/metric.js', () => {
     const key = 'gauge-metric:vw'
     const labels = { brand: 'vw' }
     await Promise.all(
-      [50, 50, 0, 50].map(value => metric.gauge(name, value, labels))
+      [50, 50, 0, 50].map(value =>
+        this.metricRegistry.gauge(name, value, labels)
+      )
     )
 
-    expect(metric.metrics, 'to have key', key)
-    expect(metric.metrics[key].value, 'to be', 50)
+    expect(this.metricRegistry.metrics, 'to have key', key)
+    expect(this.metricRegistry.metrics[key].value, 'to be', 50)
 
     await Promise.all(
-      [20, 40, 80].map(value => metric.gauge(name, value, { brand: 'foo' }))
+      [20, 40, 80].map(value =>
+        this.metricRegistry.gauge(name, value, { brand: 'foo' })
+      )
     )
 
     const anotherKey = 'gauge-metric:foo'
-    expect(metric.metrics, 'to have key', anotherKey)
-    expect(metric.metrics[anotherKey].value, 'to be', 80)
+    expect(this.metricRegistry.metrics, 'to have key', anotherKey)
+    expect(this.metricRegistry.metrics[anotherKey].value, 'to be', 80)
   })
 
   it('dumps all metrics', async () => {
@@ -54,9 +65,9 @@ describe('src/metric.js', () => {
     const key = 'abc'
     const labels = null
     const value = 2
-    metric.gauge(name, value, labels)
+    this.metricRegistry.gauge(name, value, labels)
 
-    const actualMetric = (await metric.getMetrics()).filter(
+    const actualMetric = (await this.metricRegistry.getMetrics()).filter(
       m => m.name === key && m.labels === labels
     )[0]
     expect(actualMetric, 'to only have keys', [
