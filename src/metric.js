@@ -48,8 +48,11 @@ class MetricRegistry {
     return result
   }
 
+  createKey(name, labels) {
+    return labels ? [name, ...Object.values(labels)].join(':') : name
+  }
   async gauge(name, value, labels) {
-    const key = labels ? [name, ...Object.values(labels)].join(':') : name
+    const key = this.createKey(name, labels)
 
     if (!this.metrics[key]) {
       this.metrics[key] = {
@@ -64,7 +67,7 @@ class MetricRegistry {
     }
   }
   async cumulative(name, value, labels) {
-    const key = labels ? [name, ...Object.values(labels)].join(':') : name
+    const key = this.createKey(name, labels)
 
     if (!this.metrics[key]) {
       this.metrics[key] = {
