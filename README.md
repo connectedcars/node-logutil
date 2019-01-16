@@ -150,12 +150,6 @@ Captures a snapshot of the image state and adds `endTime=Date.now()` to all obje
 This function is intended to be used together with [metrics-subscriber-api](https://github.com/connectedcars/metrics-subscriber-api)
 
 
-
-### log.MetricsRegistry.prototype.gauge(name, value[, labels, reducerFn])
-Same as 
-
-
-
 ### log.MetricRegistry.prototype.getMetrics()
 Returns all metrics as an array of objects.
 Example:
