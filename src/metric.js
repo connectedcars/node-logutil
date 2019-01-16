@@ -10,8 +10,8 @@ class MetricRegistry {
     this.metrics = {}
   }
   async logMetrics() {
-    for (let key of Object.values(this.metrics)) {
-      statistic({ ...this.metrics[key], endTime: Date.now() })
+    for (let key of Object.keys(this.metrics)) {
+      statistic(`Metric dump`, { ...this.metrics[key], endTime: Date.now() })
     }
   }
   async getMetrics() {
@@ -57,7 +57,15 @@ class MetricRegistry {
   }
 
   createKey(name, labels) {
-    return labels ? [name, ...Object.values(labels)].join(':') : name
+    if (labels) {
+      const labelKey = Object.keys(labels)
+        .map(k => [k, labels[k]])
+        .flat()
+        .join(':')
+      return [name, labelKey].join('-')
+    }
+
+    return name
   }
   async gauge(name, value, labels) {
     const key = this.createKey(name, labels)
