@@ -103,6 +103,51 @@ Type: `object`
 
 Object hash to provide log context.
 
+## log.MetricRegistry()
+A singleton instance that holds the state of all metrics in the application at a given point in time. The class should be instantiated globally and kept through the process lifetime.
+
+### log.MetricsRegistry.prototype.gauge(name, value[, labels])
+### log.MetricsRegistry.prototype.cumulative(name, value[, labels])
+
+#### name
+Type: `string`
+Name of the metric to write. The recommended format is `[namespace]/[metric-name]`. E.g. `ingester/queue-size` 
+
+
+#### value
+Type: `number`
+A value to write. It's worth noting that we're always using floating-point precision for these values.
+
+### labels
+Type: `object`
+An optional label map that denotes some specific properties you want to group by / filter on later. Please note that this map _must_ have hashable values. Thus, you're not allowed to nest objects.
+It's also worth noting that the `MetricRegistry` will log all permutations of the label, so please only use it to store categorical types and not, say `carId`s.
+Example: `{tableName: 'LatestCarPositions'}`
+
+### log.MetricRegistry.prototype.logMetrics()
+Captures a snapshot of the image state and adds `endTime=Date.now()` to all objects. Afterwards all metrics are dumped to stdout using `node-logutil`'s `log.statistic` function. All metrics are dumped using `LOG_LEVEL=INFO`, so make sure your application uses at least that log level.
+
+This function is intended to be used together with [metrics-subscriber-api](https://github.com/connectedcars/metrics-subscriber-api)
+
+
+### log.MetricRegistry.prototype.getMetrics()
+Returns all metrics as an array of objects.
+Example:
+```
+{
+  name: 'gauge-metric',
+  type: 'GAUGE',
+  value: 50,
+  labels: { brand: 'vw' }
+}
+```
+### log.MetricRegistry.prototype.getPrometheusMetrics()
+Returns an array of strings formatted using the [Prometheus exposition format](https://github.com/prometheus/docs/blob/master/content/docs/instrumenting/exposition_formats.md)
+The format should follow their EBNF definition, but is not tested against a parser as of this moment.
+
+
+This function is intended to be exposed through a small HTTP server and used in conjunction with Prometheus in the future.
+
 ## Usage
 
 ``` javascript
@@ -133,6 +178,16 @@ log.info(() => {
   })
 })
 // Outputs to stdout (after 500 ms): {"message":"This is an info message","level":"INFO","timestamp":"2017-09-01T13:37:42Z"}
+
+// Instantiate as a singleton
+const registry = log.MetricRegistry()
+
+// Write some data
+await registry.gauge('namespace/metric-name', 20, {brand: 'vw'})
+await registry.cumulative('namespace/cumulative-metric-name', 40, {brand: 'seat'})
+
+// Dump metrics to stdout regularly
+setInterval(registry.logMetrics, 30000)
 ```
 
 ## Configuration
