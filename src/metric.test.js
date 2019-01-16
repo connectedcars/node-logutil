@@ -107,6 +107,7 @@ describe('src/metric.js', () => {
 
   it('dumps all metrics', async () => {
     await this.metricRegistry.gauge('abc', 2, null)
+    await this.metricRegistry.gauge('abc', 2, null)
     await this.metricRegistry.gauge('foo', 4, { a: 'b' })
     await this.metricRegistry.cumulative('baz', 1, null)
 
