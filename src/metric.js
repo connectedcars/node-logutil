@@ -56,8 +56,7 @@ class MetricRegistry {
   createKey(name, labels) {
     if (labels) {
       const labelKey = Object.keys(labels)
-        .map(k => [k, labels[k]])
-        .flat()
+        .map(k => [k, labels[k]].join(':'))
         .join(':')
       return [name, labelKey].join('-')
     }
