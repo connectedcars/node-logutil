@@ -48,9 +48,6 @@ class MetricRegistry {
           )
           break
         }
-        default: {
-          continue
-        }
       }
     }
     return result
