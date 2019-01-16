@@ -172,7 +172,7 @@ describe('src/metric.js', () => {
           type: 'GAUGE',
           value: 4,
           labels: { brand: 'vw' },
-          endTime: 1504273062000
+          endTime: '2017-09-01T13:37:42.000Z'
         },
         level: 'STATISTIC',
         timestamp: '2017-09-01T13:37:42.000Z'
@@ -189,8 +189,8 @@ describe('src/metric.js', () => {
           type: 'CUMULATIVE',
           value: 20,
           labels: { brand: 'vw' },
-          startTime: 1504273062000,
-          endTime: 1504273062000
+          startTime: '2017-09-01T13:37:42.000Z',
+          endTime: '2017-09-01T13:37:42.000Z'
         },
         level: 'STATISTIC',
         timestamp: '2017-09-01T13:37:42.000Z'

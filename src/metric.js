@@ -9,9 +9,17 @@ class MetricRegistry {
   constructor() {
     this.metrics = {}
   }
+
+  convertTimestampToIsoString(metric) {
+    if (metric.startTime) {
+      metric.startTime = new Date(metric.startTime).toISOString()
+    }
+    metric.endTime = new Date(metric.endTime).toISOString()
+    return metric
+  }
   async logMetrics() {
     for (let metric of await this.getMetrics()) {
-      statistic(`Metric dump`, metric)
+      statistic(`Metric dump`, this.convertTimestampToIsoString(metric))
     }
   }
   async getMetrics() {
