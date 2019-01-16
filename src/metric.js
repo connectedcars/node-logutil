@@ -72,8 +72,7 @@ class MetricRegistry {
         name: name,
         type: metricTypes.GAUGE,
         value: value,
-        labels: labels,
-        startTime: Date.now()
+        labels: labels
       }
     } else {
       this.metrics[key].value = value
