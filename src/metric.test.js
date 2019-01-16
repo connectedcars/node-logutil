@@ -1,5 +1,5 @@
 const expect = require('unexpected')
-const { MetricRegistry } = require('./metric')
+const MetricRegistry = require('./metric')
 const sinon = require('sinon')
 
 describe('src/metric.js', () => {

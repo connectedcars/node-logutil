@@ -3,5 +3,6 @@ module.exports = {
   statistic: require('./statistic'),
   info: require('./info'),
   warn: require('./warn'),
-  error: require('./error')
+  error: require('./error'),
+  MetricRegistry: require('./metric')
 }

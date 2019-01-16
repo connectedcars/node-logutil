@@ -95,7 +95,4 @@ class MetricRegistry {
   }
 }
 
-module.exports = {
-  MetricRegistry,
-  metricTypes
-}
+module.exports = MetricRegistry
