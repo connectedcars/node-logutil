@@ -106,8 +106,8 @@ Object hash to provide log context.
 ## log.MetricRegistry()
 A singleton instance that holds the state of all metrics in the application at a given point in time. The class should be instantiated globally and kept through the process lifetime.
 
-### log.MetricsRegistry.prototype.gauge(name, value[, labels])
 ### log.MetricsRegistry.prototype.cumulative(name, value[, labels])
+A monotically increasing number that. E.g. the number of requests since the process started.
 
 #### name
 Type: `string`
@@ -124,10 +124,36 @@ An optional label map that denotes some specific properties you want to group by
 It's also worth noting that the `MetricRegistry` will log all permutations of the label, so please only use it to store categorical types and not, say `carId`s.
 Example: `{tableName: 'LatestCarPositions'}`
 
+
+### log.MetricsRegistry.prototype.gauge(name, value[, labels, reducerFn])
+_Please refer to `log.MetricsRegistry.prototype.cumulative()` for a definition of the arguments name, value and labels_
+
+An instantaneous measurement of a varying number. Per default, we will only store the value and timestamp of the latest inserted value. So if you insert two values, e.g. `gauge('foo', 2)` at time 0 and `gauge('foo', 4)` at time 2, and the metrics are scraped at time 3, we will report `value=4,time=2` to the log. If you for some reason don't want this, you can specify an optional `reducerFn` argument:
+```
+// Function that takes the mean over all values in that timespan
+const fn = (arr) => arr.reduce((a, b) => a+b)) / arr.length
+
+// Sample some data
+registry.gauge('foo', 10, null, fn)
+registry.gauge('foo', 20, null, fn)
+
+// logMetric reports value=30 and generates a timestamp
+registry.logMetrics()
+```
+
+
+
+
 ### log.MetricRegistry.prototype.logMetrics()
 Captures a snapshot of the image state and adds `endTime=Date.now()` to all objects. Afterwards all metrics are dumped to stdout using `node-logutil`'s `log.statistic` function. All metrics are dumped using `LOG_LEVEL=INFO`, so make sure your application uses at least that log level.
 
 This function is intended to be used together with [metrics-subscriber-api](https://github.com/connectedcars/metrics-subscriber-api)
+
+
+
+### log.MetricsRegistry.prototype.gauge(name, value[, labels, reducerFn])
+Same as 
+
 
 
 ### log.MetricRegistry.prototype.getMetrics()
@@ -185,6 +211,9 @@ const registry = log.MetricRegistry()
 // Write some data
 await registry.gauge('namespace/metric-name', 20, {brand: 'vw'})
 await registry.cumulative('namespace/cumulative-metric-name', 40, {brand: 'seat'})
+
+// In case you want to do aggregations more granular than the regular dump, you can pass in a reducer function taking an array of numbers.
+await registry.gauge('namespace/metric-name', 20, {brand: 'vw'}, (arr) => arr.reduce((a, b) => a+b)) / arr.length
 
 // Dump metrics to stdout regularly
 setInterval(registry.logMetrics, 30000)

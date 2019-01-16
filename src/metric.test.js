@@ -51,12 +51,13 @@ describe('src/metric.js', () => {
 
     expect(this.metricRegistry.metrics, 'to have key', key)
 
-    expect(this.metricRegistry.metrics[key], 'to not have key', 'endTime')
+    expect(this.metricRegistry.metrics[key], 'to have key', 'endTime')
     expect(this.metricRegistry.metrics[key], 'to equal', {
       name: 'gauge-metric',
       type: 'GAUGE',
       value: 50,
-      labels: { brand: 'vw' }
+      labels: { brand: 'vw' },
+      endTime: 1504273062000
     })
 
     await Promise.all(
@@ -67,41 +68,74 @@ describe('src/metric.js', () => {
 
     const anotherKey = 'gauge-metric-brand:foo'
     expect(this.metricRegistry.metrics, 'to have key', anotherKey)
-    expect(
-      this.metricRegistry.metrics[anotherKey],
-      'to not have key',
-      'endTime'
-    )
+    expect(this.metricRegistry.metrics[anotherKey], 'to have key', 'endTime')
     expect(this.metricRegistry.metrics[anotherKey], 'to equal', {
       name: 'gauge-metric',
       type: 'GAUGE',
       value: 80,
-      labels: { brand: 'foo' }
+      labels: { brand: 'foo' },
+      endTime: 1504273062000
     })
 
     expect(this.createKey.callCount, 'to be', 7)
     expect(this.createKey.args[0], 'to equal', [name, labels])
   })
 
-  it('dumps all metrics', async () => {
-    this.metricRegistry.gauge('abc', 2, null)
-    this.metricRegistry.gauge('foo', 4, { a: 'b' })
+  it('creates gauge metric with reducer function', async () => {
+    const fn = arr => arr.reduce((a, b) => a + b) / arr.length
+    await this.metricRegistry.gauge('baz', 20, null, fn)
+    await this.metricRegistry.gauge('baz', 30, null, fn)
 
-    const actualMetric = await this.metricRegistry.getMetrics()
-    expect(actualMetric[0], 'to equal', {
-      name: 'abc',
+    expect(this.metricRegistry.metrics['baz'], 'to equal', {
+      value: [20, 30],
+      name: 'baz',
       type: 'GAUGE',
-      value: 2,
+      reducerFn: fn,
+      labels: null
+    })
+
+    const metrics = await this.metricRegistry.getMetrics()
+
+    expect(metrics[0], 'to equal', {
+      value: 25,
+      name: 'baz',
+      type: 'GAUGE',
       labels: null,
       endTime: 1504273062000
     })
-    expect(actualMetric[1], 'to equal', {
-      name: 'foo',
-      type: 'GAUGE',
-      value: 4,
-      labels: { a: 'b' },
-      endTime: 1504273062000
-    })
+  })
+
+  it('dumps all metrics', async () => {
+    await this.metricRegistry.gauge('abc', 2, null)
+    await this.metricRegistry.gauge('foo', 4, { a: 'b' })
+    await this.metricRegistry.cumulative('baz', 1, null)
+
+    const actualMetric = await this.metricRegistry.getMetrics()
+
+    expect(actualMetric, 'to equal', [
+      {
+        name: 'abc',
+        type: 'GAUGE',
+        value: 2,
+        labels: null,
+        endTime: 1504273062000
+      },
+      {
+        name: 'foo',
+        type: 'GAUGE',
+        value: 4,
+        labels: { a: 'b' },
+        endTime: 1504273062000
+      },
+      {
+        name: 'baz',
+        type: 'CUMULATIVE',
+        value: 1,
+        labels: null,
+        startTime: 1504273062000,
+        endTime: 1504273062000
+      }
+    ])
   })
 
   it('creates the correct prometheus format', async () => {

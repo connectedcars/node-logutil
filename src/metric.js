@@ -10,24 +10,31 @@ class MetricRegistry {
     this.metrics = {}
   }
   async logMetrics() {
-    for (let key of Object.keys(this.metrics)) {
-      statistic(`Metric dump`, { ...this.metrics[key], endTime: Date.now() })
+    for (let metric of await this.getMetrics()) {
+      statistic(`Metric dump`, metric)
     }
   }
   async getMetrics() {
     let result = []
 
     for (let key of Object.keys(this.metrics)) {
-      result.push({ ...this.metrics[key], endTime: Date.now() })
+      const metric = { ...this.metrics[key] }
+      metric.endTime = metric.endTime ? metric.endTime : Date.now()
+
+      if (metric.reducerFn) {
+        this.metrics[key].value = []
+        metric.value = metric.reducerFn(metric.value)
+        delete metric.reducerFn
+      }
+
+      result.push(metric)
     }
 
     return result
   }
   async getPrometheusMetrics() {
     const result = []
-    for (let key of Object.keys(this.metrics)) {
-      const metric = this.metrics[key]
-
+    for (let metric of await this.getMetrics()) {
       let labelsFormatted = ''
 
       if (metric.labels) {
@@ -44,7 +51,7 @@ class MetricRegistry {
         }
         case metricTypes.CUMULATIVE: {
           result.push(
-            `${metric.name}${labelsFormatted} ${metric.value} ${Date.now()}`
+            `${metric.name}${labelsFormatted} ${metric.value} ${metric.endTime}`
           )
           break
         }
@@ -63,18 +70,25 @@ class MetricRegistry {
 
     return name
   }
-  async gauge(name, value, labels) {
+  async gauge(name, value, labels, reducerFn = null) {
     const key = this.createKey(name, labels)
+    const metric = this.metrics[key]
 
-    if (!this.metrics[key]) {
+    if (!metric) {
       this.metrics[key] = {
         name: name,
         type: metricTypes.GAUGE,
-        value: value,
+        value: reducerFn ? [value] : value,
         labels: labels
       }
+      if (reducerFn) {
+        this.metrics[key].reducerFn = reducerFn
+      }
+    } else if (metric.reducerFn) {
+      this.metrics[key].value.push(value)
     } else {
       this.metrics[key].value = value
+      this.metrics[key].endTime = Date.now()
     }
   }
   async cumulative(name, value, labels) {
