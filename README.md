@@ -118,11 +118,21 @@ Name of the metric to write. The recommended format is `[namespace]/[metric-name
 Type: `number`
 A value to write. It's worth noting that we're always using floating-point precision for these values.
 
-### labels
+#### labels
 Type: `object`
 An optional label map that denotes some specific properties you want to group by / filter on later. Please note that this map _must_ have hashable values. Thus, you're not allowed to nest objects.
 It's also worth noting that the `MetricRegistry` will log all permutations of the label, so please only use it to store categorical types and not, say `carId`s.
 Example: `{tableName: 'LatestCarPositions'}`
+
+
+##### Scenarios where you'd want to use this metric type
+Generally every time you're interested in monitoring:
+* the relative change in a value (marginal difference)
+* or the value relative to the time period
+
+E.g.
+* Inserted rows since last time
+* Incoming HTTP requests
 
 
 ### log.MetricsRegistry.prototype.gauge(name, value[, labels, reducerFn])
@@ -141,7 +151,12 @@ registry.gauge('foo', 20, null, fn)
 registry.logMetrics()
 ```
 
+##### Scenarios where you'd want to use this metric type
+Every time you want to capture a state at a particular time. E.g.:
+* Size of a queue at a particular time
+* CPU utilization
 
+A rule of thumb: If a value can go vary (i.e. go up and down), and it should be captured at a specific time, then it's a good candidate for a gauge.
 
 
 ### log.MetricRegistry.prototype.logMetrics()
