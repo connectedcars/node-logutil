@@ -18,9 +18,11 @@ class MetricRegistry {
     return metric
   }
   async logMetrics() {
-    for (let metric of await this.getMetrics()) {
-      statistic(`Metric dump`, this.convertTimestampToIsoString(metric))
-    }
+    const metrics = await this.getMetrics()
+
+    statistic(`Metric dump`, {
+      metrics: metrics.map(this.convertTimestampToIsoString)
+    })
   }
   async getMetrics() {
     let result = []

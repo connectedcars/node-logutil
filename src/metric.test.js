@@ -161,7 +161,7 @@ describe('src/metric.js', () => {
     await this.metricRegistry.cumulative('cumulative', 20, { brand: 'vw' })
     await this.metricRegistry.logMetrics()
 
-    expect(this.statistic.callCount, 'to be', 2)
+    expect(this.statistic.callCount, 'to be', 1)
     expect(this.statistic.args[0].length, 'to be', 1)
     expect(
       this.statistic.args[0][0],
@@ -169,29 +169,23 @@ describe('src/metric.js', () => {
       JSON.stringify({
         message: 'Metric dump',
         context: {
-          name: 'gauge',
-          type: 'GAUGE',
-          value: 4,
-          labels: { brand: 'vw' },
-          endTime: '2017-09-01T13:37:42.000Z'
-        },
-        level: 'STATISTIC',
-        timestamp: '2017-09-01T13:37:42.000Z'
-      })
-    )
-
-    expect(
-      this.statistic.args[1][0],
-      'to equal',
-      JSON.stringify({
-        message: 'Metric dump',
-        context: {
-          name: 'cumulative',
-          type: 'CUMULATIVE',
-          value: 20,
-          labels: { brand: 'vw' },
-          startTime: '2017-09-01T13:37:42.000Z',
-          endTime: '2017-09-01T13:37:42.000Z'
+          metrics: [
+            {
+              name: 'gauge',
+              type: 'GAUGE',
+              value: 4,
+              labels: { brand: 'vw' },
+              endTime: '2017-09-01T13:37:42.000Z'
+            },
+            {
+              name: 'cumulative',
+              type: 'CUMULATIVE',
+              value: 20,
+              labels: { brand: 'vw' },
+              startTime: '2017-09-01T13:37:42.000Z',
+              endTime: '2017-09-01T13:37:42.000Z'
+            }
+          ]
         },
         level: 'STATISTIC',
         timestamp: '2017-09-01T13:37:42.000Z'
