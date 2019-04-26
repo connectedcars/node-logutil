@@ -157,6 +157,16 @@ describe('src/format', () => {
       /^\{"message":"something","context":\{"count":21,"val":"bar"\},"data":\[1337,"John"\],"stack":"Error: something\\n(.+?)","level":"WARN","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
     )
   })
+  it('formats context which includes error object', () => {
+    expect(
+      format(logLevels.WARN, 'something', {
+        MyContext: 1,
+        e: new Error('some err')
+      }),
+      'to match',
+      /^\{"message":"something","context":\{"MyContext":1,"e":\{"stack":"Error: some err\\n(.+?)","message":"some err"\}\},"level":"WARN","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+    )
+  })
   it('formats very large message', () => {
     let blob = ''
     for (let i = 0; i < 1024; i++) {

@@ -29,6 +29,31 @@ const stripStringify = (mixedContent, walkerFunction) => {
   return JSON.stringify(mixedContent, walkerFunction).replace(/\\n/g, '\\n')
 }
 
+const formatError = (err) => {
+  const errObj = {}
+
+  for (const errKey of Object.getOwnPropertyNames(err)) {
+    errObj[errKey] = err[errKey]
+  }
+
+  return errObj
+}
+
+const formatContext = (context) => {
+  const newContext = {}
+  for (const key of Object.keys(context)) {
+    const val = context[key]
+
+    if (val instanceof Error) { // Errors cannot be stringified.
+      newContext[key] = formatError(val)
+    } else {
+      newContext[key] = val
+    }
+  }
+
+  return newContext
+}
+
 const format = (level, ...args) => {
   let output = {
     message: '',
@@ -36,8 +61,8 @@ const format = (level, ...args) => {
     data: []
   }
   /*
-  wrap it all in a try and catch, so if there was an 
-  error we go through just the object that caused an 
+  wrap it all in a try and catch, so if there was an
+  error we go through just the object that caused an
   error, and not over zealously check every objects values
   */
 
@@ -60,7 +85,7 @@ const format = (level, ...args) => {
       if (args.length > 1) {
         if (args[1] instanceof Object) {
           // Set objects as secondary arguments as the context
-          output.context = args[1]
+          output.context = formatContext(args[1])
         } else {
           // Set all other types as data
           output.data.push(args[1])
@@ -107,15 +132,15 @@ const format = (level, ...args) => {
   } catch (err) {
     if (err.message === 'Converting circular structure to JSON') {
       /*
-      it is a circular reference and parse 
-      through the object while keeping track 
+      it is a circular reference and parse
+      through the object while keeping track
       of elements occuring twice
       */
 
       // keep track of object values, so we know if they occur twice (circular reference)
       let seenValues = []
 
-      var valueChecker = function(objKey, objValue) {
+      var valueChecker = function (objKey, objValue) {
         if (objValue !== null && typeof objValue === 'object') {
           if (seenValues.indexOf(objValue) > -1) {
             // let it be logged that there was something sanitized
@@ -139,9 +164,9 @@ const format = (level, ...args) => {
 
       // but what if it is still too long?
       /*
-      don't check depth on the original object 
-      which contains circular references. Parse 
-      the santisized down object back to an 
+      don't check depth on the original object
+      which contains circular references. Parse
+      the santisized down object back to an
       object to count object depth
       */
       if (reachedMaxDepth(JSON.parse(returnBlob))) {
