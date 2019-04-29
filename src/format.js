@@ -36,6 +36,8 @@ const formatError = (err) => {
     errObj[errKey] = err[errKey]
   }
 
+  errObj['__constructorName'] = err.constructor.name
+
   return errObj
 }
 
