@@ -31,7 +31,7 @@ describe('src/info', () => {
     log.info('something')
     expect(console.log.callCount, 'to be', 1)
     expect(console.log.args[0], 'to equal', [
-      '{"message":"something","level":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","severity":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 0)
@@ -43,7 +43,7 @@ describe('src/info', () => {
     log.info()
     expect(console.log.callCount, 'to be', 1)
     expect(console.log.args[0], 'to equal', [
-      '{"level":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"severity":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 0)
@@ -55,7 +55,7 @@ describe('src/info', () => {
     log.info('something', 42, { foo: 'bar' })
     expect(console.log.callCount, 'to be', 1)
     expect(console.log.args[0], 'to equal', [
-      '{"message":"something","data":[42,{"foo":"bar"}],"level":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","data":[42,{"foo":"bar"}],"severity":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 0)
@@ -69,13 +69,13 @@ describe('src/info', () => {
     log.info({ foo: true })
     expect(console.log.callCount, 'to be', 3)
     expect(console.log.args[0], 'to equal', [
-      '{"message":"something","level":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","severity":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.log.args[1], 'to equal', [
-      '{"message":"something else","data":[42],"level":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something else","data":[42],"severity":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.log.args[2], 'to equal', [
-      '{"foo":true,"level":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"foo":true,"severity":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 0)
@@ -116,7 +116,7 @@ describe('src/info', () => {
         expect(stub.callCount, 'to be', 1)
         expect(console.log.callCount, 'to be', 1)
         expect(console.log.args[0], 'to equal', [
-          '{"message":"something","level":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
+          '{"message":"something","severity":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
         ])
         expect(console.warn.callCount, 'to be', 0)
         expect(console.error.callCount, 'to be', 0)
@@ -134,7 +134,7 @@ describe('src/info', () => {
       .then(() => {
         expect(console.log.callCount, 'to be', 1)
         expect(console.log.args[0], 'to equal', [
-          '{"message":"something","level":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
+          '{"message":"something","severity":"INFO","timestamp":"2017-09-01T13:37:42.000Z"}'
         ])
         expect(console.warn.callCount, 'to be', 0)
         expect(console.error.callCount, 'to be', 0)
@@ -157,7 +157,7 @@ describe('src/info', () => {
         expect(
           console.log.args[0][0],
           'to match',
-          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","level":"INFO","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"INFO","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
         )
         expect(console.warn.callCount, 'to be', 0)
         expect(console.error.callCount, 'to be', 0)
@@ -181,7 +181,7 @@ describe('src/info', () => {
         expect(
           console.log.args[0][0],
           'to match',
-          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","level":"INFO","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"INFO","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
         )
         expect(console.warn.callCount, 'to be', 0)
         expect(console.error.callCount, 'to be', 0)

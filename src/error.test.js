@@ -25,7 +25,7 @@ describe('src/error', () => {
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 1)
     expect(console.error.args[0], 'to equal', [
-      '{"message":"something","level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
   })
   it('logs empty argument', () => {
@@ -34,7 +34,7 @@ describe('src/error', () => {
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 1)
     expect(console.error.args[0], 'to equal', [
-      '{"level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
   })
   it('logs multiple arguments', () => {
@@ -44,7 +44,7 @@ describe('src/error', () => {
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 1)
     expect(console.error.args[0], 'to equal', [
-      '{"message":"something","data":[42,{"foo":"bar"}],"level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","data":[42,{"foo":"bar"}],"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
   })
   it('logs multiple times', () => {
@@ -56,13 +56,13 @@ describe('src/error', () => {
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 3)
     expect(console.error.args[0], 'to equal', [
-      '{"message":"something","level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.error.args[1], 'to equal', [
-      '{"message":"something else","data":[42],"level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something else","data":[42],"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.error.args[2], 'to equal', [
-      '{"foo":true,"level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"foo":true,"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
   })
 
@@ -82,7 +82,7 @@ describe('src/error', () => {
         expect(console.warn.callCount, 'to be', 0)
         expect(console.error.callCount, 'to be', 1)
         expect(console.error.args[0], 'to equal', [
-          '{"message":"something","level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+          '{"message":"something","severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
         ])
         done()
       })
@@ -97,7 +97,7 @@ describe('src/error', () => {
         expect(console.warn.callCount, 'to be', 0)
         expect(console.error.callCount, 'to be', 1)
         expect(console.error.args[0], 'to equal', [
-          '{"message":"something","level":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+          '{"message":"something","severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
         ])
         done()
       })
@@ -117,7 +117,7 @@ describe('src/error', () => {
         expect(
           console.error.args[0][0],
           'to match',
-          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","level":"ERROR","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"ERROR","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
         )
         done()
       })
@@ -138,7 +138,7 @@ describe('src/error', () => {
         expect(
           console.error.args[0][0],
           'to match',
-          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","level":"ERROR","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"ERROR","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
         )
         done()
       })

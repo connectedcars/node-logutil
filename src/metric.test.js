@@ -187,7 +187,7 @@ describe('src/metric.js', () => {
             }
           ]
         },
-        level: 'STATISTIC',
+        severity: 'STATISTIC',
         timestamp: '2017-09-01T13:37:42.000Z'
       })
     )
