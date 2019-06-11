@@ -112,8 +112,8 @@ const format = (level, ...args) => {
       // Remove empty data
       delete output.data
     }
-    // Add level
-    output.level = getLogLevelName(level)
+    // Add level (Stackdriver support)
+    output.severity = getLogLevelName(level)
     // Add timestamp
     output.timestamp = new Date().toISOString()
     // Stringify output
