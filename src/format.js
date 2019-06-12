@@ -29,7 +29,7 @@ const stripStringify = (mixedContent, walkerFunction) => {
   return JSON.stringify(mixedContent, walkerFunction).replace(/\\n/g, '\\n')
 }
 
-const formatError = (err) => {
+const formatError = err => {
   const errObj = {}
 
   for (const errKey of Object.getOwnPropertyNames(err)) {
@@ -41,12 +41,13 @@ const formatError = (err) => {
   return errObj
 }
 
-const formatContext = (context) => {
+const formatContext = context => {
   const newContext = {}
   for (const key of Object.keys(context)) {
     const val = context[key]
 
-    if (val instanceof Error) { // Errors cannot be stringified.
+    if (val instanceof Error) {
+      // Errors cannot be stringified.
       newContext[key] = formatError(val)
     } else {
       newContext[key] = val
@@ -116,9 +117,15 @@ const format = (level, ...args) => {
     output.severity = getLogLevelName(level)
     // Add timestamp
     output.timestamp = new Date().toISOString()
+    // Ensure that message size is no more than half the total allowed size for the blob
+    if (output.message && output.message.length > MAX_TEXT_LENGTH / 2) {
+      output.message = `Truncated: ${output.message.substring(
+        0,
+        MAX_TEXT_LENGTH / 2
+      )}...`
+    }
     // Stringify output
     const blob = stripStringify(output)
-    // Check for size being less than than 100 KB
     if (blob.length <= MAX_TEXT_LENGTH) {
       // Check for depth above 10
       if (reachedMaxDepth(output)) {
@@ -142,7 +149,7 @@ const format = (level, ...args) => {
       // keep track of object values, so we know if they occur twice (circular reference)
       let seenValues = []
 
-      var valueChecker = function (objKey, objValue) {
+      var valueChecker = function(objKey, objValue) {
         if (objValue !== null && typeof objValue === 'object') {
           if (seenValues.indexOf(objValue) > -1) {
             // let it be logged that there was something sanitized

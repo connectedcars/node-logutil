@@ -179,7 +179,7 @@ describe('src/format', () => {
     expect(
       format(logLevels.WARN, msg),
       'to match',
-      /^\{"message":"Truncated \{\\\"message\\\":\\\"(something!){10200,}somethin"\}$/
+      /^{"message":"Truncated: (something!){5000,}\.{3}"\,\"severity\"\:\"WARN\",\"timestamp\"\:\"2017-09-01T13:37:42\.000Z\"}$/
     )
     expect(
       format(logLevels.WARN, msg).length,
@@ -284,11 +284,7 @@ describe('src/format', () => {
     obj.message = msg
     obj.circular = obj
 
-    expect(
-      format(logLevels.WARN, obj),
-      'to match',
-      /^\{"message":"Truncated \{\\\"message\\\":\\\"(something!){10200,}somethin"\}$/
-    )
+    expect(format(logLevels.WARN, obj), 'to match', /^.*Truncated.*circular.*$/)
     expect(
       format(logLevels.WARN, msg).length,
       'to be less than or equal to',
