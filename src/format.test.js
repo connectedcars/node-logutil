@@ -187,6 +187,26 @@ describe('src/format', () => {
       110 * 1024
     )
   })
+  it('formats very large data', () => {
+    let blob = ''
+    for (let i = 0; i < 1024; i++) {
+      blob += 'something!'
+    }
+    let data = ''
+    for (let i = 0; i < 110; i++) {
+      data += blob
+    }
+    expect(
+      format(logLevels.WARN, 'hello', data),
+      'to match',
+      /^\{"message":"Truncated \{\\\"message\\\":\\\"hello\\\",\\\"data\\\":\[\\\"(something!){5000,}so.*$/
+    )
+    expect(
+      format(logLevels.WARN, 'hello', data).length,
+      'to be less than or equal to',
+      110 * 1024
+    )
+  })
   it('formats not too deep object', () => {
     expect(
       format(logLevels.WARN, {

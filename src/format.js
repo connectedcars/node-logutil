@@ -118,6 +118,7 @@ const format = (level, ...args) => {
     // Add timestamp
     output.timestamp = new Date().toISOString()
     // Ensure that message size is no more than half the total allowed size for the blob
+    // This is to truncate very large sql statements
     if (output.message && output.message.length > MAX_TEXT_LENGTH / 2) {
       output.message = `Truncated: ${output.message.substring(
         0,
