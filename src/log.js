@@ -8,7 +8,7 @@ const doLog = (level, ...args) => {
     case logLevels.ERROR:
       console.error(output)
       break
-    case logLevels.WARNING:
+    case logLevels.WARN:
       console.warn(output)
       break
     default:
