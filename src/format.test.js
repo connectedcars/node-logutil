@@ -8,7 +8,7 @@ describe('src/format', () => {
     this.clock = sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
   })
   afterEach(() => {
-    this.clock.restore()
+    sinon.restore()
   })
 
   it('formats string message', () => {

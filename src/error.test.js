@@ -14,9 +14,7 @@ describe('src/error', () => {
   afterEach(() => {
     process.env.LOG_LEVEL = this.oldLogLevel
     this.clock.restore()
-    console.log.restore()
-    console.warn.restore()
-    console.error.restore()
+    sinon.restore()
   })
 
   it('logs single argument', () => {

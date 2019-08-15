@@ -12,9 +12,7 @@ describe('src/metric.js', () => {
     this.statistic = sinon.spy(console, 'log')
   })
   afterEach(async () => {
-    this.clock.restore()
-    this.createKey.restore()
-    this.statistic.restore()
+    sinon.restore()
   })
 
   it('creates cumulative metrics', async () => {
