@@ -2,7 +2,7 @@ const expect = require('unexpected')
 const sinon = require('sinon')
 const log = require('./index')
 
-describe('src/error', () => {
+describe('src/critical', () => {
   beforeEach(() => {
     this.oldLogLevel = process.env.LOG_LEVEL
     delete process.env.LOG_LEVEL
@@ -13,54 +13,53 @@ describe('src/error', () => {
   })
   afterEach(() => {
     process.env.LOG_LEVEL = this.oldLogLevel
-    this.clock.restore()
     sinon.restore()
   })
 
   it('logs single argument', () => {
-    log.error('something')
+    log.critical('something')
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 1)
     expect(console.error.args[0], 'to equal', [
-      '{"message":"something","severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","severity":"CRITICAL","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
   })
   it('logs empty argument', () => {
-    log.error()
+    log.critical()
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 1)
     expect(console.error.args[0], 'to equal', [
-      '{"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"severity":"CRITICAL","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
   })
   it('logs multiple arguments', () => {
     process.env.LOG_LEVEL = 'INFO'
-    log.error('something', 42, { foo: 'bar' })
+    log.critical('something', 42, { foo: 'bar' })
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 1)
     expect(console.error.args[0], 'to equal', [
-      '{"message":"something","data":[42,{"foo":"bar"}],"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","data":[42,{"foo":"bar"}],"severity":"CRITICAL","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
   })
   it('logs multiple times', () => {
     process.env.LOG_LEVEL = 'DEBUG'
-    log.error('something')
-    log.error('something else', 42)
-    log.error({ foo: true })
+    log.critical('something')
+    log.critical('something else', 42)
+    log.critical({ foo: true })
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 0)
     expect(console.error.callCount, 'to be', 3)
     expect(console.error.args[0], 'to equal', [
-      '{"message":"something","severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","severity":"CRITICAL","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.error.args[1], 'to equal', [
-      '{"message":"something else","data":[42],"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something else","data":[42],"severity":"CRITICAL","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.error.args[2], 'to equal', [
-      '{"foo":true,"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"foo":true,"severity":"CRITICAL","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
   })
 
@@ -68,7 +67,7 @@ describe('src/error', () => {
     process.env.LOG_LEVEL = 'WARN'
     const stub = sinon.stub()
     log
-      .error(() => {
+      .critical(() => {
         return new Promise(resolve => {
           stub()
           resolve('something')
@@ -80,14 +79,14 @@ describe('src/error', () => {
         expect(console.warn.callCount, 'to be', 0)
         expect(console.error.callCount, 'to be', 1)
         expect(console.error.args[0], 'to equal', [
-          '{"message":"something","severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+          '{"message":"something","severity":"CRITICAL","timestamp":"2017-09-01T13:37:42.000Z"}'
         ])
         done()
       })
   })
   it('logs single argument via function', done => {
     log
-      .error(() => {
+      .critical(() => {
         return 'something'
       })
       .then(() => {
@@ -95,14 +94,14 @@ describe('src/error', () => {
         expect(console.warn.callCount, 'to be', 0)
         expect(console.error.callCount, 'to be', 1)
         expect(console.error.args[0], 'to equal', [
-          '{"message":"something","severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+          '{"message":"something","severity":"CRITICAL","timestamp":"2017-09-01T13:37:42.000Z"}'
         ])
         done()
       })
   })
   it('logs single argument via failing promise', done => {
     log
-      .error(() => {
+      .critical(() => {
         return new Promise((resolve, reject) => {
           reject(new Error('wrah'))
         })
@@ -115,14 +114,14 @@ describe('src/error', () => {
         expect(
           console.error.args[0][0],
           'to match',
-          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"ERROR","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"CRITICAL","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
         )
         done()
       })
   })
   it('logs single argument via exceptional function', done => {
     log
-      .error(() => {
+      .critical(() => {
         throw new Error('wrah')
         return new Promise(resolve => {
           resolve('something')
@@ -136,7 +135,7 @@ describe('src/error', () => {
         expect(
           console.error.args[0][0],
           'to match',
-          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"ERROR","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"CRITICAL","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
         )
         done()
       })

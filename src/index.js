@@ -4,5 +4,6 @@ module.exports = {
   info: require('./info'),
   warn: require('./warn'),
   error: require('./error'),
+  critical: require('./critical'),
   MetricRegistry: require('./metric')
 }

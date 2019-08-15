@@ -4,6 +4,7 @@ const { format } = require('./format')
 const doLog = (level, ...args) => {
   const output = format(level, ...args)
   switch (level) {
+    case logLevels.CRITICAL:
     case logLevels.ERROR:
       console.error(output)
       break

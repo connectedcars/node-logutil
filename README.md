@@ -103,6 +103,24 @@ Type: `object`
 
 Object hash to provide log context.
 
+### log.critical(message[, context])
+
+Logs the provided `message` with the optional `context` as a JSON string, if the log level is set to output critical.
+
+The method takes most input, but the combination described above is the recommended one.
+
+#### message
+
+Type: `string`
+
+Descriptive log message
+
+#### context
+
+Type: `object`
+
+Object hash to provide log context.
+
 ## log.MetricRegistry()
 A singleton instance that holds the state of all metrics in the application at a given point in time. The class should be instantiated globally and kept through the process lifetime.
 
@@ -198,6 +216,8 @@ log.warn('This is a warning message', { type: 'missing-item' })
 // Outputs to stderr: {"message":"This is a warning message","severity":"WARNING","timestamp":"2017-09-01T13:37:42Z","context":{"type":"missing-item"}}
 log.error('This is an error message', { context: { items: ['foo', 'bar'] } })
 // Outputs to stderr: {"message":"This is an error message","severity":"ERROR","timestamp":"2017-09-01T13:37:42Z","context":{"items":["foo","bar"]}}
+log.critical('This is a critical message', { context: { items: ['foo', 'bar'] } })
+// Outputs to stderr: {"message":"This is a critical message","severity":"CRITICAL","timestamp":"2017-09-01T13:37:42Z","context":{"items":["foo","bar"]}}
 
 log.debug(() => {
   // Only runs if log level is debug
@@ -230,4 +250,4 @@ setInterval(registry.logMetrics, 30000)
 
 ## Configuration
 
-Determining what to output depends on the environment variable `LOG_LEVEL`. This variable can be `DEBUG`, `INFO`, `WARN`, or `ERROR`, but defaults to `WARN`.
+Determining what to output depends on the environment variable `LOG_LEVEL`. This variable can be `DEBUG`, `STATISTIC`, `INFO`, `WARN`, `ERROR`, or `CRITICAL` but defaults to `WARN`.

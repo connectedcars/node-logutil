@@ -13,10 +13,7 @@ describe('src/warn', () => {
   })
   afterEach(() => {
     process.env.LOG_LEVEL = this.oldLogLevel
-    this.clock.restore()
-    console.log.restore()
-    console.warn.restore()
-    console.error.restore()
+    sinon.restore()
   })
 
   it('logs nothing', () => {
@@ -31,7 +28,7 @@ describe('src/warn', () => {
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 1)
     expect(console.warn.args[0], 'to equal', [
-      '{"message":"something","severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.error.callCount, 'to be', 0)
   })
@@ -40,7 +37,7 @@ describe('src/warn', () => {
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 1)
     expect(console.warn.args[0], 'to equal', [
-      '{"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.error.callCount, 'to be', 0)
   })
@@ -50,7 +47,7 @@ describe('src/warn', () => {
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 1)
     expect(console.warn.args[0], 'to equal', [
-      '{"message":"something","data":[42,{"foo":"bar"}],"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","data":[42,{"foo":"bar"}],"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.error.callCount, 'to be', 0)
   })
@@ -62,13 +59,13 @@ describe('src/warn', () => {
     expect(console.log.callCount, 'to be', 0)
     expect(console.warn.callCount, 'to be', 3)
     expect(console.warn.args[0], 'to equal', [
-      '{"message":"something","severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.warn.args[1], 'to equal', [
-      '{"message":"something else","data":[42],"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something else","data":[42],"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.warn.args[2], 'to equal', [
-      '{"foo":true,"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"foo":true,"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     ])
     expect(console.error.callCount, 'to be', 0)
   })
@@ -106,7 +103,7 @@ describe('src/warn', () => {
         expect(console.log.callCount, 'to be', 0)
         expect(console.warn.callCount, 'to be', 1)
         expect(console.warn.args[0], 'to equal', [
-          '{"message":"something","severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+          '{"message":"something","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
         ])
         expect(console.error.callCount, 'to be', 0)
         done()
@@ -121,7 +118,7 @@ describe('src/warn', () => {
         expect(console.log.callCount, 'to be', 0)
         expect(console.warn.callCount, 'to be', 1)
         expect(console.warn.args[0], 'to equal', [
-          '{"message":"something","severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+          '{"message":"something","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
         ])
         expect(console.error.callCount, 'to be', 0)
         done()
@@ -141,7 +138,7 @@ describe('src/warn', () => {
         expect(
           console.warn.args[0][0],
           'to match',
-          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"WARN","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"WARNING","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
         )
         expect(console.error.callCount, 'to be', 0)
         done()
@@ -162,7 +159,7 @@ describe('src/warn', () => {
         expect(
           console.warn.args[0][0],
           'to match',
-          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"WARN","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+          /^\{"message":"wrah","stack":"Error: wrah\\n(.+?)","severity":"WARNING","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
         )
         expect(console.error.callCount, 'to be', 0)
         done()

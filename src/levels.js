@@ -1,4 +1,5 @@
 const logLevels = {
+  CRITICAL: 50,
   ERROR: 40,
   WARN: 30,
   INFO: 20,
@@ -16,14 +17,22 @@ const getLogLevel = () => {
 }
 
 const getLogLevelName = logLevel => {
-  let level = 'UNKNOWN'
-  for (const key in logLevels) {
-    if (logLevel === logLevels[key]) {
-      level = key
-      break
-    }
+  switch (logLevel) {
+    case logLevels.CRITICAL:
+      return 'CRITICAL'
+    case logLevels.ERROR:
+      return 'ERROR'
+    case logLevels.WARN:
+      return 'WARNING' // Override for stackdriver severity
+    case logLevels.INFO:
+      return 'INFO'
+    case logLevels.STATISTIC:
+      return 'STATISTIC'
+    case logLevels.DEBUG:
+      return 'DEBUG'
+    default:
+      return 'UNKNOWN'
   }
-  return level
 }
 
 module.exports = {

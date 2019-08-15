@@ -12,9 +12,7 @@ describe('src/statistic', () => {
   })
   afterEach(() => {
     process.env.LOG_LEVEL = this.oldLogLevel
-    this.clock.restore()
-    console.warn.restore()
-    console.error.restore()
+    sinon.restore()
   })
 
   it('logs nothing', () => {

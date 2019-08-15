@@ -38,6 +38,10 @@ describe('src/levels', () => {
       process.env.LOG_LEVEL = 'ERROR'
       expect(getLogLevel(), 'to be', logLevels.ERROR)
     })
+    it('has environment set to CRITICAL', () => {
+      process.env.LOG_LEVEL = 'CRITICAL'
+      expect(getLogLevel(), 'to be', logLevels.CRITICAL)
+    })
     it('has environment set to lowercase', () => {
       process.env.LOG_LEVEL = 'error'
       expect(getLogLevel(), 'to be', logLevels.ERROR)
@@ -48,11 +52,14 @@ describe('src/levels', () => {
     })
   })
   describe('getLogLevelName', () => {
+    it('gets CRITICAL', () => {
+      expect(getLogLevelName(50), 'to be', 'CRITICAL')
+    })
     it('gets ERROR', () => {
       expect(getLogLevelName(40), 'to be', 'ERROR')
     })
     it('gets WARN', () => {
-      expect(getLogLevelName(30), 'to be', 'WARN')
+      expect(getLogLevelName(30), 'to be', 'WARNING')
     })
     it('gets INFO', () => {
       expect(getLogLevelName(20), 'to be', 'INFO')
