@@ -1,6 +1,7 @@
 const logLevels = {
+  CRITICAL: 50,
   ERROR: 40,
-  WARN: 30,
+  WARNING: 30,
   INFO: 20,
   STATISTIC: 15,
   DEBUG: 10
@@ -12,7 +13,7 @@ const getLogLevel = () => {
   if (logLevel in logLevels) {
     return logLevels[logLevel]
   }
-  return logLevels.WARN
+  return logLevels.WARNING
 }
 
 const getLogLevelName = logLevel => {

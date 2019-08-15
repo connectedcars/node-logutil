@@ -12,11 +12,11 @@ describe('src/levels', () => {
     })
 
     it('defaults to WARN', () => {
-      expect(getLogLevel(), 'to be', logLevels.WARN)
+      expect(getLogLevel(), 'to be', logLevels.WARNING)
     })
     it('defaults to WARN for empty string', () => {
       process.env.LOG_LEVEL = ''
-      expect(getLogLevel(), 'to be', logLevels.WARN)
+      expect(getLogLevel(), 'to be', logLevels.WARNING)
     })
     it('has environment set to DEBUG', () => {
       process.env.LOG_LEVEL = 'DEBUG'
@@ -32,7 +32,7 @@ describe('src/levels', () => {
     })
     it('has environment set to WARN', () => {
       process.env.LOG_LEVEL = 'WARN'
-      expect(getLogLevel(), 'to be', logLevels.WARN)
+      expect(getLogLevel(), 'to be', logLevels.WARNING)
     })
     it('has environment set to ERROR', () => {
       process.env.LOG_LEVEL = 'ERROR'
@@ -44,7 +44,7 @@ describe('src/levels', () => {
     })
     it('has environment set to mixed case', () => {
       process.env.LOG_LEVEL = 'Warn'
-      expect(getLogLevel(), 'to be', logLevels.WARN)
+      expect(getLogLevel(), 'to be', logLevels.WARNING)
     })
   })
   describe('getLogLevelName', () => {
@@ -52,7 +52,7 @@ describe('src/levels', () => {
       expect(getLogLevelName(40), 'to be', 'ERROR')
     })
     it('gets WARN', () => {
-      expect(getLogLevelName(30), 'to be', 'WARN')
+      expect(getLogLevelName(30), 'to be', 'WARNING')
     })
     it('gets INFO', () => {
       expect(getLogLevelName(20), 'to be', 'INFO')

@@ -13,158 +13,165 @@ describe('src/format', () => {
 
   it('formats string message', () => {
     expect(
-      format(logLevels.WARN, 'something'),
+      format(logLevels.WARNING, 'something'),
       'to be',
-      '{"message":"something","severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats number message', () => {
     expect(
-      format(logLevels.WARN, 42),
+      format(logLevels.WARNING, 42),
       'to be',
-      '{"message":42,"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":42,"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats string message with extra params', () => {
     expect(
-      format(logLevels.WARN, 'something', 42, 'foo'),
+      format(logLevels.WARNING, 'something', 42, 'foo'),
       'to be',
-      '{"message":"something","data":[42,"foo"],"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","data":[42,"foo"],"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats string message with context param', () => {
     expect(
-      format(logLevels.WARN, 'something', { count: 42, val: 'foo' }),
+      format(logLevels.WARNING, 'something', { count: 42, val: 'foo' }),
       'to be',
-      '{"message":"something","context":{"count":42,"val":"foo"},"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","context":{"count":42,"val":"foo"},"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats string message with context and extra params', () => {
     expect(
-      format(logLevels.WARN, 'something', { count: 42, val: 'foo' }, 'foo'),
+      format(logLevels.WARNING, 'something', { count: 42, val: 'foo' }, 'foo'),
       'to be',
-      '{"message":"something","context":{"count":42,"val":"foo"},"data":["foo"],"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","context":{"count":42,"val":"foo"},"data":["foo"],"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats single object', () => {
     expect(
-      format(logLevels.WARN, { message: 'something', count: 42, val: 'foo' }),
+      format(logLevels.WARNING, {
+        message: 'something',
+        count: 42,
+        val: 'foo'
+      }),
       'to be',
-      '{"message":"something","count":42,"val":"foo","severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","count":42,"val":"foo","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats single object with extra params', () => {
     expect(
       format(
-        logLevels.WARN,
+        logLevels.WARNING,
         { message: 'something', count: 42, val: 'foo' },
         42,
         'foo'
       ),
       'to be',
-      '{"message":"something","data":[42,"foo"],"count":42,"val":"foo","severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","data":[42,"foo"],"count":42,"val":"foo","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats single object with context param', () => {
     expect(
       format(
-        logLevels.WARN,
+        logLevels.WARNING,
         { message: 'something', count: 42, val: 'foo' },
         { count: 21, val: 'bar' }
       ),
       'to be',
-      '{"message":"something","context":{"count":21,"val":"bar"},"count":42,"val":"foo","severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","context":{"count":21,"val":"bar"},"count":42,"val":"foo","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats single object with context and extra params', () => {
     expect(
       format(
-        logLevels.WARN,
+        logLevels.WARNING,
         { message: 'something', count: 42, val: 'foo' },
         { count: 21, val: 'bar' },
         1337,
         'John'
       ),
       'to be',
-      '{"message":"something","context":{"count":21,"val":"bar"},"data":[1337,"John"],"count":42,"val":"foo","severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","context":{"count":21,"val":"bar"},"data":[1337,"John"],"count":42,"val":"foo","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats single array', () => {
     expect(
-      format(logLevels.WARN, ['something', 42]),
+      format(logLevels.WARNING, ['something', 42]),
       'to be',
-      '{"message":"something, 42","data":["something",42],"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something, 42","data":["something",42],"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats single array with extra params', () => {
     expect(
-      format(logLevels.WARN, ['something', 42], 42, 'foo'),
+      format(logLevels.WARNING, ['something', 42], 42, 'foo'),
       'to be',
-      '{"message":"something, 42","data":["something",42,42,"foo"],"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something, 42","data":["something",42,42,"foo"],"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats single array with context param', () => {
     expect(
-      format(logLevels.WARN, ['something', 42], { count: 21, val: 'bar' }),
+      format(logLevels.WARNING, ['something', 42], { count: 21, val: 'bar' }),
       'to be',
-      '{"message":"something, 42","context":{"count":21,"val":"bar"},"data":["something",42],"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something, 42","context":{"count":21,"val":"bar"},"data":["something",42],"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats single array with context and extra params', () => {
     expect(
       format(
-        logLevels.WARN,
+        logLevels.WARNING,
         ['something', 42],
         { count: 21, val: 'bar' },
         1337,
         'John'
       ),
       'to be',
-      '{"message":"something, 42","context":{"count":21,"val":"bar"},"data":["something",42,1337,"John"],"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something, 42","context":{"count":21,"val":"bar"},"data":["something",42,1337,"John"],"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats error object', () => {
     expect(
-      format(logLevels.WARN, new Error('something')),
+      format(logLevels.WARNING, new Error('something')),
       'to match',
-      /^\{"message":"something","stack":"Error: something\\n(.+?)","severity":"WARN","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+      /^\{"message":"something","stack":"Error: something\\n(.+?)","severity":"WARNING","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
     )
   })
   it('formats error object with extra params', () => {
     expect(
-      format(logLevels.WARN, new Error('something'), 42, 'foo'),
+      format(logLevels.WARNING, new Error('something'), 42, 'foo'),
       'to match',
-      /^\{"message":"something","data":\[42,"foo"\],"stack":"Error: something\\n(.+?)","severity":"WARN","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+      /^\{"message":"something","data":\[42,"foo"\],"stack":"Error: something\\n(.+?)","severity":"WARNING","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
     )
   })
   it('formats error object with context param', () => {
     expect(
-      format(logLevels.WARN, new Error('something'), { count: 21, val: 'bar' }),
+      format(logLevels.WARNING, new Error('something'), {
+        count: 21,
+        val: 'bar'
+      }),
       'to match',
-      /^\{"message":"something","context":\{"count":21,"val":"bar"\},"stack":"Error: something\\n(.+?)","severity":"WARN","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+      /^\{"message":"something","context":\{"count":21,"val":"bar"\},"stack":"Error: something\\n(.+?)","severity":"WARNING","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
     )
   })
   it('formats error object with context and extra params', () => {
     expect(
       format(
-        logLevels.WARN,
+        logLevels.WARNING,
         new Error('something'),
         { count: 21, val: 'bar' },
         1337,
         'John'
       ),
       'to match',
-      /^\{"message":"something","context":\{"count":21,"val":"bar"\},"data":\[1337,"John"\],"stack":"Error: something\\n(.+?)","severity":"WARN","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+      /^\{"message":"something","context":\{"count":21,"val":"bar"\},"data":\[1337,"John"\],"stack":"Error: something\\n(.+?)","severity":"WARNING","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
     )
   })
   it('formats context which includes error object', () => {
     expect(
-      format(logLevels.WARN, 'something', {
+      format(logLevels.WARNING, 'something', {
         MyContext: 1,
         e: new Error('some err')
       }),
       'to match',
-      /^\{"message":"something","context":\{"MyContext":1,"e":\{"stack":"Error: some err\\n(.+?)","message":"some err","__constructorName":"Error"\}\},"severity":"WARN","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
+      /^\{"message":"something","context":\{"MyContext":1,"e":\{"stack":"Error: some err\\n(.+?)","message":"some err","__constructorName":"Error"\}\},"severity":"WARNING","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
     )
   })
   it('formats very large message', () => {
@@ -177,12 +184,12 @@ describe('src/format', () => {
       msg += blob
     }
     expect(
-      format(logLevels.WARN, msg),
+      format(logLevels.WARNING, msg),
       'to match',
-      /^{"message":"Truncated: (something!){5000,}\.{3}"\,\"severity\"\:\"WARN\",\"timestamp\"\:\"2017-09-01T13:37:42\.000Z\"}$/
+      /^{"message":"Truncated: (something!){5000,}\.{3}"\,\"severity\"\:\"WARNING\",\"timestamp\"\:\"2017-09-01T13:37:42\.000Z\"}$/
     )
     expect(
-      format(logLevels.WARN, msg).length,
+      format(logLevels.WARNING, msg).length,
       'to be less than or equal to',
       110 * 1024
     )
@@ -197,19 +204,19 @@ describe('src/format', () => {
       data += blob
     }
     expect(
-      format(logLevels.WARN, 'hello', data),
+      format(logLevels.WARNING, 'hello', data),
       'to match',
       /^\{"message":"Truncated \{\\\"message\\\":\\\"hello\\\",\\\"data\\\":\[\\\"(something!){5000,}so.*$/
     )
     expect(
-      format(logLevels.WARN, 'hello', data).length,
+      format(logLevels.WARNING, 'hello', data).length,
       'to be less than or equal to',
       110 * 1024
     )
   })
   it('formats not too deep object', () => {
     expect(
-      format(logLevels.WARN, {
+      format(logLevels.WARNING, {
         nested: {
           nested: {
             nested: {
@@ -221,12 +228,12 @@ describe('src/format', () => {
         }
       }),
       'to be',
-      '{"nested":{"nested":{"nested":{"nested":{"nested":{"nested":{"nested":{"nested":{"nested":"value"}}}}}}}},"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"nested":{"nested":{"nested":{"nested":{"nested":{"nested":{"nested":{"nested":{"nested":"value"}}}}}}}},"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats too deep object', () => {
     expect(
-      format(logLevels.WARN, {
+      format(logLevels.WARNING, {
         nested: {
           nested: {
             nested: {
@@ -246,7 +253,7 @@ describe('src/format', () => {
         }
       }),
       'to be',
-      '{"message":"Depth limited {\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":\\"value\\"}}}}}}}}}}},\\"severity\\":\\"WARN\\",\\"timestamp\\":\\"2017-09-01T13:37:42.000Z\\"}"}'
+      '{"message":"Depth limited {\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":\\"value\\"}}}}}}}}}}},\\"severity\\":\\"WARNING\\",\\"timestamp\\":\\"2017-09-01T13:37:42.000Z\\"}"}'
     )
   })
 
@@ -257,9 +264,9 @@ describe('src/format', () => {
     topLevel.circular = topLevel
 
     expect(
-      format(logLevels.WARN, topLevel),
+      format(logLevels.WARNING, topLevel),
       'to be',
-      '{"normalProperty":"expected value","circular":{"normalProperty":"expected value","circular":"[Circular:StrippedOut]"},"severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"normalProperty":"expected value","circular":{"normalProperty":"expected value","circular":"[Circular:StrippedOut]"},"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
 
@@ -285,9 +292,9 @@ describe('src/format', () => {
     }
     nestedObj.circular = nestedObj
     expect(
-      format(logLevels.WARN, nestedObj),
+      format(logLevels.WARNING, nestedObj),
       'to be',
-      '{"message":"Depth limited {\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":\\"value\\"}}}}}}}}}}},\\"circular\\":{\\"nested\\":\\"[Circular:StrippedOut]\\",\\"circular\\":\\"[Circular:StrippedOut]\\"},\\"severity\\":\\"WARN\\",\\"timestamp\\":\\"2017-09-01T13:37:42.000Z\\"}"}'
+      '{"message":"Depth limited {\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":{\\"nested\\":\\"value\\"}}}}}}}}}}},\\"circular\\":{\\"nested\\":\\"[Circular:StrippedOut]\\",\\"circular\\":\\"[Circular:StrippedOut]\\"},\\"severity\\":\\"WARNING\\",\\"timestamp\\":\\"2017-09-01T13:37:42.000Z\\"}"}'
     )
   })
 
@@ -304,9 +311,13 @@ describe('src/format', () => {
     obj.message = msg
     obj.circular = obj
 
-    expect(format(logLevels.WARN, obj), 'to match', /^.*Truncated.*circular.*$/)
     expect(
-      format(logLevels.WARN, msg).length,
+      format(logLevels.WARNING, obj),
+      'to match',
+      /^.*Truncated.*circular.*$/
+    )
+    expect(
+      format(logLevels.WARNING, msg).length,
       'to be less than or equal to',
       110 * 1024
     )
@@ -318,7 +329,7 @@ describe('src/format', () => {
     sandbox.stub(JSON, 'stringify').throws()
 
     expect(() => {
-      format(logLevels.WARN, { data: 'fake' })
+      format(logLevels.WARNING, { data: 'fake' })
     }, 'to throw')
 
     sandbox.restore()
@@ -393,8 +404,8 @@ describe('src/format', () => {
           WHERE (userId = :userId) ''}
         ) AS count2
     `
-    const expectedLogOutput = `{"message":"\\n      SELECT\\n        ( SELECT COUNT(*) FROM messages\\n          WHERE (senderId = :userId OR receiverId = :userId) AND workshopId = :workshopId\\n        ) AS count1,\\n\\n        ( SELECT COUNT(*) FROM UserActivities\\n          WHERE (userId = :userId) ''}\\n        ) AS count2\\n    ","severity":"WARN","timestamp":"2017-09-01T13:37:42.000Z"}`
+    const expectedLogOutput = `{"message":"\\n      SELECT\\n        ( SELECT COUNT(*) FROM messages\\n          WHERE (senderId = :userId OR receiverId = :userId) AND workshopId = :workshopId\\n        ) AS count1,\\n\\n        ( SELECT COUNT(*) FROM UserActivities\\n          WHERE (userId = :userId) ''}\\n        ) AS count2\\n    ","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}`
 
-    expect(format(logLevels.WARN, countQuery), 'to be', expectedLogOutput)
+    expect(format(logLevels.WARNING, countQuery), 'to be', expectedLogOutput)
   })
 })
