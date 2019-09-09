@@ -10,6 +10,7 @@
     "test": "nyc --reporter=lcov --reporter=text mocha \"src/**/*.test.js\"",
     "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
+  "types": "types/@connectedcars/logutil/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/connectedcars/node-logutil.git"
