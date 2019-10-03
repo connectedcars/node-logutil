@@ -5,7 +5,7 @@ const { format, reachedMaxDepth } = require('./format')
 
 describe('src/format', () => {
   beforeEach(() => {
-    this.clock = sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
+    sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
   })
   afterEach(() => {
     sinon.restore()
@@ -59,36 +59,21 @@ describe('src/format', () => {
   })
   it('formats single object with extra params', () => {
     expect(
-      format(
-        logLevels.WARN,
-        { message: 'something', count: 42, val: 'foo' },
-        42,
-        'foo'
-      ),
+      format(logLevels.WARN, { message: 'something', count: 42, val: 'foo' }, 42, 'foo'),
       'to be',
       '{"message":"something","data":[42,"foo"],"count":42,"val":"foo","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats single object with context param', () => {
     expect(
-      format(
-        logLevels.WARN,
-        { message: 'something', count: 42, val: 'foo' },
-        { count: 21, val: 'bar' }
-      ),
+      format(logLevels.WARN, { message: 'something', count: 42, val: 'foo' }, { count: 21, val: 'bar' }),
       'to be',
       '{"message":"something","context":{"count":21,"val":"bar"},"count":42,"val":"foo","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
   it('formats single object with context and extra params', () => {
     expect(
-      format(
-        logLevels.WARN,
-        { message: 'something', count: 42, val: 'foo' },
-        { count: 21, val: 'bar' },
-        1337,
-        'John'
-      ),
+      format(logLevels.WARN, { message: 'something', count: 42, val: 'foo' }, { count: 21, val: 'bar' }, 1337, 'John'),
       'to be',
       '{"message":"something","context":{"count":21,"val":"bar"},"data":[1337,"John"],"count":42,"val":"foo","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
@@ -116,13 +101,7 @@ describe('src/format', () => {
   })
   it('formats single array with context and extra params', () => {
     expect(
-      format(
-        logLevels.WARN,
-        ['something', 42],
-        { count: 21, val: 'bar' },
-        1337,
-        'John'
-      ),
+      format(logLevels.WARN, ['something', 42], { count: 21, val: 'bar' }, 1337, 'John'),
       'to be',
       '{"message":"something, 42","context":{"count":21,"val":"bar"},"data":["something",42,1337,"John"],"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
@@ -153,13 +132,7 @@ describe('src/format', () => {
   })
   it('formats error object with context and extra params', () => {
     expect(
-      format(
-        logLevels.WARN,
-        new Error('something'),
-        { count: 21, val: 'bar' },
-        1337,
-        'John'
-      ),
+      format(logLevels.WARN, new Error('something'), { count: 21, val: 'bar' }, 1337, 'John'),
       'to match',
       /^\{"message":"something","context":\{"count":21,"val":"bar"\},"data":\[1337,"John"\],"stack":"Error: something\\n(.+?)","severity":"WARNING","timestamp":"2017-09-01T13:37:42\.000Z"\}$/
     )
@@ -188,11 +161,7 @@ describe('src/format', () => {
       'to match',
       /^{"message":"Truncated: (something!){5000,}\.{3}"\,\"severity\"\:\"WARNING\",\"timestamp\"\:\"2017-09-01T13:37:42\.000Z\"}$/
     )
-    expect(
-      format(logLevels.WARN, msg).length,
-      'to be less than or equal to',
-      110 * 1024
-    )
+    expect(format(logLevels.WARN, msg).length, 'to be less than or equal to', 110 * 1024)
   })
   it('formats very large data', () => {
     let blob = ''
@@ -208,11 +177,7 @@ describe('src/format', () => {
       'to match',
       /^\{"message":"Truncated \{\\\"message\\\":\\\"hello\\\",\\\"data\\\":\[\\\"(something!){5000,}so.*$/
     )
-    expect(
-      format(logLevels.WARN, 'hello', data).length,
-      'to be less than or equal to',
-      110 * 1024
-    )
+    expect(format(logLevels.WARN, 'hello', data).length, 'to be less than or equal to', 110 * 1024)
   })
   it('formats not too deep object', () => {
     expect(
@@ -312,23 +277,15 @@ describe('src/format', () => {
     obj.circular = obj
 
     expect(format(logLevels.WARN, obj), 'to match', /^.*Truncated.*circular.*$/)
-    expect(
-      format(logLevels.WARN, msg).length,
-      'to be less than or equal to',
-      110 * 1024
-    )
+    expect(format(logLevels.WARN, msg).length, 'to be less than or equal to', 110 * 1024)
   })
 
   it('still throws unknown errors', () => {
-    var sandbox = sinon.sandbox.create()
-
-    sandbox.stub(JSON, 'stringify').throws()
+    sinon.stub(JSON, 'stringify').throws()
 
     expect(() => {
       format(logLevels.WARN, { data: 'fake' })
     }, 'to throw')
-
-    sandbox.restore()
   })
 
   it('gets to the bottom of a not too nested object', () => {

@@ -5,11 +5,10 @@ const sinon = require('sinon')
 describe('src/metric.js', () => {
   beforeEach(() => {
     this.createKey = sinon.spy(MetricRegistry.prototype, 'createKey')
-    this.clock = sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
+    sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
     this.metricRegistry = new MetricRegistry()
 
     process.env.LOG_LEVEL = 'STATISTIC'
-    this.statistic = sinon.spy(console, 'log')
   })
   afterEach(async () => {
     sinon.restore()
@@ -41,11 +40,7 @@ describe('src/metric.js', () => {
     const name = 'gauge-metric'
     const key = 'gauge-metric-brand:vw'
     const labels = { brand: 'vw' }
-    await Promise.all(
-      [50, 50, 0, 50].map(value =>
-        this.metricRegistry.gauge(name, value, labels)
-      )
-    )
+    await Promise.all([50, 50, 0, 50].map(value => this.metricRegistry.gauge(name, value, labels)))
 
     expect(this.metricRegistry.metrics, 'to have key', key)
 
@@ -58,11 +53,7 @@ describe('src/metric.js', () => {
       endTime: 1504273062000
     })
 
-    await Promise.all(
-      [20, 40, 80].map(value =>
-        this.metricRegistry.gauge(name, value, { brand: 'foo' })
-      )
-    )
+    await Promise.all([20, 40, 80].map(value => this.metricRegistry.gauge(name, value, { brand: 'foo' })))
 
     const anotherKey = 'gauge-metric-brand:foo'
     expect(this.metricRegistry.metrics, 'to have key', anotherKey)
@@ -142,11 +133,7 @@ describe('src/metric.js', () => {
     await this.metricRegistry.gauge('foo', 4, { brand: 'vw' })
     await this.metricRegistry.cumulative('baz', 8, { model: 'touran' })
     const actualMetric = await this.metricRegistry.getPrometheusMetrics()
-    expect(actualMetric, 'to equal', [
-      'abc 2',
-      "foo{brand='vw'} 4",
-      "baz{model='touran'} 8 1504273062000"
-    ])
+    expect(actualMetric, 'to equal', ['abc 2', "foo{brand='vw'} 4", "baz{model='touran'} 8 1504273062000"])
   })
 
   it('metric key is constructed correctly', async () => {
@@ -155,14 +142,15 @@ describe('src/metric.js', () => {
   })
 
   it('logs all metrics', async () => {
+    const statistic = sinon.stub(console, 'log')
     await this.metricRegistry.gauge('gauge', 4, { brand: 'vw' })
     await this.metricRegistry.cumulative('cumulative', 20, { brand: 'vw' })
     await this.metricRegistry.logMetrics()
 
-    expect(this.statistic.callCount, 'to be', 1)
-    expect(this.statistic.args[0].length, 'to be', 1)
+    expect(statistic.callCount, 'to be', 1)
+    expect(statistic.args[0].length, 'to be', 1)
     expect(
-      this.statistic.args[0][0],
+      statistic.args[0][0],
       'to equal',
       JSON.stringify({
         message: 'Metric dump',
