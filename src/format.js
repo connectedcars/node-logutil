@@ -137,7 +137,7 @@ const format = (level, ...args) => {
     // Wrap truncated output in a string
     return lengthLimited(blob)
   } catch (err) {
-    if (err.message === 'Converting circular structure to JSON') {
+    if (err.message.indexOf('Converting circular structure to JSON') !== -1) {
       /*
       it is a circular reference and parse
       through the object while keeping track
