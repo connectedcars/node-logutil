@@ -60,9 +60,7 @@ class MetricRegistry {
           break
         }
         case metricTypes.CUMULATIVE: {
-          result.push(
-            `${metric.name}${labelsFormatted} ${metric.value} ${metric.endTime}`
-          )
+          result.push(`${metric.name}${labelsFormatted} ${metric.value} ${metric.endTime}`)
           break
         }
       }

@@ -120,10 +120,7 @@ const format = (level, ...args) => {
     // Ensure that message size is no more than half the total allowed size for the blob
     // This is to truncate very large sql statements
     if (output.message && output.message.length > MAX_TEXT_LENGTH / 2) {
-      output.message = `Truncated: ${output.message.substring(
-        0,
-        MAX_TEXT_LENGTH / 2
-      )}...`
+      output.message = `Truncated: ${output.message.substring(0, MAX_TEXT_LENGTH / 2)}...`
     }
     // Stringify output
     const blob = stripStringify(output)
@@ -140,7 +137,7 @@ const format = (level, ...args) => {
     // Wrap truncated output in a string
     return lengthLimited(blob)
   } catch (err) {
-    if (err.message === 'Converting circular structure to JSON') {
+    if (err.message.indexOf('Converting circular structure to JSON') !== -1) {
       /*
       it is a circular reference and parse
       through the object while keeping track
