@@ -1,3 +1,5 @@
+const { EventEmitter } = require('events')
+
 const statistic = require('./statistic')
 
 const metricTypes = {
@@ -6,8 +8,22 @@ const metricTypes = {
 }
 
 class MetricRegistry {
-  constructor() {
+  constructor(metricOptions) {
     this.metrics = {}
+
+    if (metricOptions.includeLogStats) {
+      this._initLogStats()
+    }
+  }
+
+  _initLogStats() {
+    const statsEmitter = new EventEmitter()
+
+    statsEmitter.on('log-stats', stats => {
+      this.cumulative('log-stats', stats.size, {
+        truncatedLogLine: stats.truncatedLogLine
+      })
+    })
   }
 
   convertTimestampToIsoString(metric) {

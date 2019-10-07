@@ -6,7 +6,9 @@ describe('src/metric.js', () => {
   beforeEach(() => {
     this.createKey = sinon.spy(MetricRegistry.prototype, 'createKey')
     sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
-    this.metricRegistry = new MetricRegistry()
+    this.metricRegistry = new MetricRegistry({
+      includeLogStats: true
+    })
 
     process.env.LOG_LEVEL = 'STATISTIC'
   })
