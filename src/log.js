@@ -3,14 +3,12 @@ const { format } = require('./format')
 const EventEmitter = require('events')
 
 const statsEmitter = new EventEmitter()
-const MAX_STRING_LENGTH = 50
 
 const doLog = (level, ...args) => {
   const output = format(level, ...args)
 
   statsEmitter.emit('log-stats', {
-    size: output.length,
-    truncatedLogLine: output.substring(0, MAX_STRING_LENGTH)
+    size: output.length
   })
   switch (level) {
     case logLevels.CRITICAL:

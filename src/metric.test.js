@@ -6,9 +6,7 @@ describe('src/metric.js', () => {
   beforeEach(() => {
     this.createKey = sinon.spy(MetricRegistry.prototype, 'createKey')
     sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
-    this.metricRegistry = new MetricRegistry({
-      includeLogStats: true
-    })
+    this.metricRegistry = new MetricRegistry()
 
     process.env.LOG_LEVEL = 'STATISTIC'
   })
@@ -16,6 +14,13 @@ describe('src/metric.js', () => {
     sinon.restore()
   })
 
+  it('initializes constructor with options', () => {
+    let initLogStats = sinon.spy(MetricRegistry.prototype, '_initLogStats')
+    new MetricRegistry({
+      includeLogStats: true
+    })
+    expect(initLogStats.callCount, 'to be', 1)
+  })
   it('creates cumulative metrics', async () => {
     let value = 10
 

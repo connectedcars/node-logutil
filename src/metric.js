@@ -8,7 +8,7 @@ const metricTypes = {
 }
 
 class MetricRegistry {
-  constructor(metricOptions) {
+  constructor(metricOptions = {}) {
     this.metrics = {}
 
     if (metricOptions.includeLogStats) {
@@ -19,11 +19,7 @@ class MetricRegistry {
   _initLogStats() {
     const statsEmitter = new EventEmitter()
 
-    statsEmitter.on('log-stats', stats => {
-      this.cumulative('log-stats', stats.size, {
-        truncatedLogLine: stats.truncatedLogLine
-      })
-    })
+    statsEmitter.on('log-stats', stats => this.cumulative('log-stats', stats.size))
   }
 
   convertTimestampToIsoString(metric) {
