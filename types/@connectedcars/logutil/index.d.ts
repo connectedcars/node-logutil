@@ -1,3 +1,6 @@
+export namespace config {
+  export function addPostFormatInterceptor(postFormatInterceptor: (level: number, output: string) => string): void
+}
 export function debug(...args: any[]): void
 export function statistic(...args: any[]): void
 export function info(...args: any[]): void

@@ -1,8 +1,12 @@
+const { _postFormatInterceptors } = require('./config')
 const { logLevels, getLogLevel } = require('./levels')
 const { format } = require('./format')
 
 const doLog = (level, ...args) => {
-  const output = format(level, ...args)
+  let output = format(level, ...args)
+  _postFormatInterceptors.forEach(interceptor => {
+    output = interceptor(level, output)
+  })
   switch (level) {
     case logLevels.CRITICAL:
     case logLevels.ERROR:
