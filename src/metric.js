@@ -19,9 +19,16 @@ class MetricRegistry {
   }
   async logMetrics() {
     const metrics = await this.getMetrics()
-
+    const result = []
+    for (const metric of metrics) {
+      if (Date.now() - metric.endTime > 24 * 60 * 60 * 1000) {
+        // Skip data points more than 24 hours old
+        continue
+      }
+      result.push(this.convertTimestampToIsoString(metric))
+    }
     statistic(`Metric dump`, {
-      metrics: metrics.map(this.convertTimestampToIsoString)
+      metrics: result
     })
   }
   async getMetrics() {
