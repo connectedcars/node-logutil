@@ -5,7 +5,7 @@ const sinon = require('sinon')
 describe('src/metric.js', () => {
   beforeEach(() => {
     this.createKey = sinon.spy(MetricRegistry.prototype, 'createKey')
-    sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
+    this.clock = sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
     this.metricRegistry = new MetricRegistry()
 
     process.env.LOG_LEVEL = 'STATISTIC'
@@ -175,6 +175,39 @@ describe('src/metric.js', () => {
         },
         severity: 'STATISTIC',
         timestamp: '2017-09-01T13:37:42.000Z'
+      })
+    )
+  })
+
+  it('does not log old metrics', async () => {
+    const statistic = sinon.stub(console, 'log')
+    await this.metricRegistry.gauge('gauge', 4, { brand: 'vw' })
+    await this.metricRegistry.gauge('gauge', 5, { brand: 'vw' })
+    this.clock.tick(24 * 60 * 60 * 1000 + 1)
+    await this.metricRegistry.cumulative('cumulative', 20, { brand: 'vw' })
+    await this.metricRegistry.logMetrics()
+
+    expect(statistic.callCount, 'to be', 1)
+    expect(statistic.args[0].length, 'to be', 1)
+    expect(
+      statistic.args[0][0],
+      'to equal',
+      JSON.stringify({
+        message: 'Metric dump',
+        context: {
+          metrics: [
+            {
+              name: 'cumulative',
+              type: 'CUMULATIVE',
+              value: 20,
+              labels: { brand: 'vw' },
+              startTime: '2017-09-02T13:37:42.001Z',
+              endTime: '2017-09-02T13:37:42.001Z'
+            }
+          ]
+        },
+        severity: 'STATISTIC',
+        timestamp: '2017-09-02T13:37:42.001Z'
       })
     )
   })
