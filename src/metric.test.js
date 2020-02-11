@@ -36,6 +36,28 @@ describe('src/metric.js', () => {
     expect(this.createKey.args[0], 'to equal', [name, labels])
   })
 
+  it('creates cumulative metric and formats label', async () => {
+    let value = 10
+
+    const name = 'my-metric'
+    const labels = { release: 99 }
+
+    for (let i = 1; i <= 4; i++) {
+      await this.metricRegistry.cumulative(name, value, labels)
+
+      expect(this.metricRegistry.metrics['my-metric-release:99'], 'to equal', {
+        name: name,
+        type: 'CUMULATIVE',
+        value: value * i,
+        labels: { release: '99' },
+        startTime: 1504273062000
+      })
+    }
+
+    expect(this.createKey.callCount, 'to be', 4)
+    expect(this.createKey.args[0], 'to equal', [name, labels])
+  })
+
   it('creates gauge metric', async () => {
     const name = 'gauge-metric'
     const key = 'gauge-metric-brand:vw'
