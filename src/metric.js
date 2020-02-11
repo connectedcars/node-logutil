@@ -85,7 +85,17 @@ class MetricRegistry {
 
     return name
   }
+  formatLabels(labels) {
+    if (!labels) {
+      return
+    }
+    for (const [key, value] of Object.entries(labels)) {
+      labels[key] = String(value)
+    }
+  }
+
   async gauge(name, value, labels, reducerFn = null) {
+    this.formatLabels(labels)
     const key = this.createKey(name, labels)
     const metric = this.metrics[key]
 
@@ -107,6 +117,7 @@ class MetricRegistry {
     }
   }
   async cumulative(name, value, labels) {
+    this.formatLabels(labels)
     const key = this.createKey(name, labels)
 
     if (!this.metrics[key]) {
