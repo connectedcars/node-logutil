@@ -1,9 +1,10 @@
 {
-  "extends": ["plugin:prettier/recommended"],	
+  "extends": ["plugin:prettier/recommended"],
   "parserOptions": {
     "ecmaVersion": 2018
   },
   "rules": {
+    "no-undef": "error",
     "no-unused-vars": "error",
     "prettier/prettier": ["error", {
       "printWidth": 120,
@@ -12,6 +13,17 @@
     }],
     "curly": "error"
   },
+  "overrides": [
+    {
+      "files": [
+        "**/*.test.js",
+        "**/*.it.js"
+      ],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ],
   "env": {
     "es6": true,
     "node": true

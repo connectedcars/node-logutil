@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test": "nyc --reporter=lcov --reporter=text mocha \"src/**/*.test.js\"",
-    "coveralls": "nyc report --reporter=text-lcov | coveralls"
+    "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "lint": "eslint src/**",
+    "lint:fix": "eslint --fix src/**"
   },
   "types": "types/@connectedcars/logutil/index.d.ts",
   "repository": {
