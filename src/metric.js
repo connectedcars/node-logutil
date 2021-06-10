@@ -19,17 +19,28 @@ class MetricRegistry {
   }
   logMetrics() {
     const metrics = this.getMetrics()
-    const result = []
+    const result = {}
+
     for (const metric of metrics) {
       if (Date.now() - metric.endTime > 24 * 60 * 60 * 1000) {
         // Skip data points more than 24 hours old
         continue
       }
-      result.push(this.convertTimestampToIsoString(metric))
+
+      const formattedMetric = this.convertTimestampToIsoString(metric)
+
+      if (result[metric.name]) {
+        result[metric.name].push(formattedMetric)
+      } else {
+        result[metric.name] = [formattedMetric]
+      }
     }
-    statistic(`Metric dump`, {
-      metrics: result
-    })
+
+    for (const metrics of Object.values(result)) {
+      statistic('Metric dump', {
+        metrics
+      })
+    }
   }
   getMetrics() {
     let result = []

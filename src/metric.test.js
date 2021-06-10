@@ -168,7 +168,7 @@ describe('src/metric.js', () => {
     this.metricRegistry.cumulative('cumulative', 20, { brand: 'vw' })
     this.metricRegistry.logMetrics()
 
-    expect(statistic.callCount, 'to be', 1)
+    expect(statistic.callCount, 'to be', 2)
     expect(statistic.args[0].length, 'to be', 1)
     expect(
       statistic.args[0][0],
@@ -183,13 +183,86 @@ describe('src/metric.js', () => {
               value: 4,
               labels: { brand: 'vw' },
               endTime: '2017-09-01T13:37:42.000Z'
-            },
+            }
+          ]
+        },
+        severity: 'STATISTIC',
+        timestamp: '2017-09-01T13:37:42.000Z'
+      })
+    )
+
+    expect(
+      statistic.args[1][0],
+      'to equal',
+      JSON.stringify({
+        message: 'Metric dump',
+        context: {
+          metrics: [
             {
               name: 'cumulative',
               type: 'CUMULATIVE',
               value: 20,
               labels: { brand: 'vw' },
               startTime: '2017-09-01T13:37:42.000Z',
+              endTime: '2017-09-01T13:37:42.000Z'
+            }
+          ]
+        },
+        severity: 'STATISTIC',
+        timestamp: '2017-09-01T13:37:42.000Z'
+      })
+    )
+  })
+
+  it('groups metrics by name', () => {
+    const statistic = sinon.stub(console, 'log')
+    this.metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
+    this.metricRegistry.gauge('foo-metric', 2, { brand: 'seat' })
+    this.metricRegistry.gauge('bar-metric', 20, { brand: 'vw' })
+    this.metricRegistry.logMetrics()
+
+    expect(statistic.callCount, 'to be', 2)
+    expect(statistic.args[0].length, 'to be', 1)
+    expect(
+      statistic.args[0][0],
+      'to equal',
+      JSON.stringify({
+        message: 'Metric dump',
+        context: {
+          metrics: [
+            {
+              name: 'foo-metric',
+              type: 'GAUGE',
+              value: 4,
+              labels: { brand: 'vw' },
+              endTime: '2017-09-01T13:37:42.000Z'
+            },
+            {
+              name: 'foo-metric',
+              type: 'GAUGE',
+              value: 2,
+              labels: { brand: 'seat' },
+              endTime: '2017-09-01T13:37:42.000Z'
+            }
+          ]
+        },
+        severity: 'STATISTIC',
+        timestamp: '2017-09-01T13:37:42.000Z'
+      })
+    )
+
+    expect(
+      statistic.args[1][0],
+      'to equal',
+      JSON.stringify({
+        message: 'Metric dump',
+        context: {
+          metrics: [
+            {
+              name: 'bar-metric',
+              type: 'GAUGE',
+              value: 20,
+              labels: { brand: 'vw' },
               endTime: '2017-09-01T13:37:42.000Z'
             }
           ]
