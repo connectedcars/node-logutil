@@ -17,21 +17,32 @@ class MetricRegistry {
     metric.endTime = new Date(metric.endTime).toISOString()
     return metric
   }
-  async logMetrics() {
-    const metrics = await this.getMetrics()
-    const result = []
+  logMetrics() {
+    const metrics = this.getMetrics()
+    const result = {}
+
     for (const metric of metrics) {
       if (Date.now() - metric.endTime > 24 * 60 * 60 * 1000) {
         // Skip data points more than 24 hours old
         continue
       }
-      result.push(this.convertTimestampToIsoString(metric))
+
+      const formattedMetric = this.convertTimestampToIsoString(metric)
+
+      if (result[metric.name]) {
+        result[metric.name].push(formattedMetric)
+      } else {
+        result[metric.name] = [formattedMetric]
+      }
     }
-    statistic(`Metric dump`, {
-      metrics: result
-    })
+
+    for (const metrics of Object.values(result)) {
+      statistic('Metric dump', {
+        metrics
+      })
+    }
   }
-  async getMetrics() {
+  getMetrics() {
     let result = []
 
     for (let key of Object.keys(this.metrics)) {
@@ -49,9 +60,9 @@ class MetricRegistry {
 
     return result
   }
-  async getPrometheusMetrics() {
+  getPrometheusMetrics() {
     const result = []
-    for (let metric of await this.getMetrics()) {
+    for (let metric of this.getMetrics()) {
       let labelsFormatted = ''
 
       if (metric.labels) {
@@ -94,7 +105,7 @@ class MetricRegistry {
     }
   }
 
-  async gauge(name, value, labels, reducerFn = null) {
+  gauge(name, value, labels, reducerFn = null) {
     this.formatLabels(labels)
     const key = this.createKey(name, labels)
     const metric = this.metrics[key]
@@ -116,7 +127,7 @@ class MetricRegistry {
       this.metrics[key].endTime = Date.now()
     }
   }
-  async cumulative(name, value, labels) {
+  cumulative(name, value, labels) {
     this.formatLabels(labels)
     const key = this.createKey(name, labels)
 

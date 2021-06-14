@@ -6,7 +6,7 @@ export function error(...args: any[]): void
 export function critical(...args: any[]): void
 
 export class MetricRegistry {
-  public gauge(name: string, value: number, labels?: { [key: string]: string }): Promise<void>
-  cumulative(name: string, value: number, labels?: { [key: string]: string }): Promise<void>
-  logMetrics(): Promise<void>
+  public gauge(name: string, value: number, labels?: { [key: string]: string }): void
+  cumulative(name: string, value: number, labels?: { [key: string]: string }): void
+  logMetrics(): void
 }
