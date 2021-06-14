@@ -145,4 +145,31 @@ class MetricRegistry {
   }
 }
 
-module.exports = MetricRegistry
+let metricRegistry
+let scrapeInterval
+
+async function logMetrics(delay) {
+  if (!metricRegistry) {
+    metricRegistry = new MetricRegistry()
+  }
+  metricRegistry.logMetrics()
+  scrapeInterval = setTimeout(() => logMetrics(delay), delay)
+}
+function getMetricRegistry(delay = 60 * 1000) {
+  if (!metricRegistry) {
+    logMetrics(delay)
+  }
+  return metricRegistry
+}
+
+const clearMetricRegistry = () => {
+  clearInterval(scrapeInterval)
+  metricRegistry = null
+}
+
+module.exports = {
+  getMetricRegistry,
+  clearMetricRegistry
+}
+
+module.exports = { MetricRegistry, getMetricRegistry, clearMetricRegistry }

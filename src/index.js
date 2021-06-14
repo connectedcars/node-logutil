@@ -1,3 +1,4 @@
+const { MetricRegistry, getMetricRegistry, clearMetricRegistry } = require('./metric')
 module.exports = {
   debug: require('./debug'),
   statistic: require('./statistic'),
@@ -5,5 +6,7 @@ module.exports = {
   warn: require('./warn'),
   error: require('./error'),
   critical: require('./critical'),
-  MetricRegistry: require('./metric')
+  MetricRegistry,
+  getMetricRegistry,
+  clearMetricRegistry
 }
