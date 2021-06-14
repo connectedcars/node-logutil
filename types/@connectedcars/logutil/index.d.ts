@@ -10,3 +10,6 @@ export class MetricRegistry {
   cumulative(name: string, value: number, labels?: { [key: string]: string }): void
   logMetrics(): void
 }
+
+export function getMetricRegistry(delay?: number): MetricRegistry
+export function clearMetricRegistry(): void
