@@ -1,4 +1,5 @@
 const statistic = require('./statistic')
+const error = require('./error')
 
 const metricTypes = {
   GAUGE: 'GAUGE',
@@ -106,42 +107,56 @@ class MetricRegistry {
   }
 
   gauge(name, value, labels, reducerFn = null) {
-    this.formatLabels(labels)
-    const key = this.createKey(name, labels)
-    const metric = this.metrics[key]
+    try {
+      this.formatLabels(labels)
+      const key = this.createKey(name, labels)
+      const metric = this.metrics[key]
 
-    if (!metric) {
-      this.metrics[key] = {
-        name: name,
-        type: metricTypes.GAUGE,
-        value: reducerFn ? [value] : value,
-        labels: labels
+      if (!metric) {
+        this.metrics[key] = {
+          name: name,
+          type: metricTypes.GAUGE,
+          value: reducerFn ? [value] : value,
+          labels: labels
+        }
+        if (reducerFn) {
+          this.metrics[key].reducerFn = reducerFn
+        }
+      } else if (metric.reducerFn) {
+        this.metrics[key].value.push(value)
+      } else {
+        this.metrics[key].value = value
+        this.metrics[key].endTime = Date.now()
       }
-      if (reducerFn) {
-        this.metrics[key].reducerFn = reducerFn
-      }
-    } else if (metric.reducerFn) {
-      this.metrics[key].value.push(value)
-    } else {
-      this.metrics[key].value = value
-      this.metrics[key].endTime = Date.now()
+    } catch (e) {
+      error('Failed logging metric', {
+        message: e.message,
+        stack: e.stack
+      })
     }
   }
   cumulative(name, value, labels) {
-    this.formatLabels(labels)
-    const key = this.createKey(name, labels)
+    try {
+      this.formatLabels(labels)
+      const key = this.createKey(name, labels)
 
-    if (!this.metrics[key]) {
-      this.metrics[key] = {
-        name: name,
-        type: metricTypes.CUMULATIVE,
-        value: 0,
-        labels: labels,
-        startTime: Date.now()
+      if (!this.metrics[key]) {
+        this.metrics[key] = {
+          name: name,
+          type: metricTypes.CUMULATIVE,
+          value: 0,
+          labels: labels,
+          startTime: Date.now()
+        }
       }
-    }
 
-    this.metrics[key].value += value
+      this.metrics[key].value += value
+    } catch (e) {
+      error('Failed logging metric', {
+        message: e.message,
+        stack: e.stack
+      })
+    }
   }
 }
 

@@ -6,6 +6,7 @@ describe('src/metric.js', () => {
   beforeEach(() => {
     this.createKey = sinon.spy(MetricRegistry.prototype, 'createKey')
     this.clock = sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
+    this.log = sinon.stub(console, 'log')
     this.metricRegistry = new MetricRegistry()
 
     process.env.LOG_LEVEL = 'STATISTIC'
@@ -117,6 +118,18 @@ describe('src/metric.js', () => {
       })
     })
 
+    it('fails calling gauge for unknown reasons and ignores it gracefully', () => {
+      this.createKey.restore()
+      sinon.stub(this.metricRegistry, 'createKey').throws(new Error('Something occurred'))
+      this.metricRegistry.gauge('baz', 20, null)
+    })
+
+    it('fails calling cumulative for unknown reasons and ignores it gracefully', () => {
+      this.createKey.restore()
+      sinon.stub(this.metricRegistry, 'createKey').throws(new Error('Something occurred'))
+      this.metricRegistry.cumulative('baz', 20, null)
+    })
+
     it('dumps all metrics', () => {
       this.metricRegistry.gauge('abc', 2, null)
       this.metricRegistry.gauge('abc', 2, null)
@@ -165,15 +178,14 @@ describe('src/metric.js', () => {
     })
 
     it('logs all metrics', () => {
-      const statistic = sinon.stub(console, 'log')
       this.metricRegistry.gauge('gauge', 4, { brand: 'vw' })
       this.metricRegistry.cumulative('cumulative', 20, { brand: 'vw' })
       this.metricRegistry.logMetrics()
 
-      expect(statistic.callCount, 'to be', 2)
-      expect(statistic.args[0].length, 'to be', 1)
+      expect(this.log.callCount, 'to be', 2)
+      expect(this.log.args[0].length, 'to be', 1)
       expect(
-        statistic.args[0][0],
+        this.log.args[0][0],
         'to equal',
         JSON.stringify({
           message: 'Metric dump',
@@ -194,7 +206,7 @@ describe('src/metric.js', () => {
       )
 
       expect(
-        statistic.args[1][0],
+        this.log.args[1][0],
         'to equal',
         JSON.stringify({
           message: 'Metric dump',
@@ -217,16 +229,15 @@ describe('src/metric.js', () => {
     })
 
     it('groups metrics by name', () => {
-      const statistic = sinon.stub(console, 'log')
       this.metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
       this.metricRegistry.gauge('foo-metric', 2, { brand: 'seat' })
       this.metricRegistry.gauge('bar-metric', 20, { brand: 'vw' })
       this.metricRegistry.logMetrics()
 
-      expect(statistic.callCount, 'to be', 2)
-      expect(statistic.args[0].length, 'to be', 1)
+      expect(this.log.callCount, 'to be', 2)
+      expect(this.log.args[0].length, 'to be', 1)
       expect(
-        statistic.args[0][0],
+        this.log.args[0][0],
         'to equal',
         JSON.stringify({
           message: 'Metric dump',
@@ -254,7 +265,7 @@ describe('src/metric.js', () => {
       )
 
       expect(
-        statistic.args[1][0],
+        this.log.args[1][0],
         'to equal',
         JSON.stringify({
           message: 'Metric dump',
@@ -276,17 +287,16 @@ describe('src/metric.js', () => {
     })
 
     it('does not log old metrics', () => {
-      const statistic = sinon.stub(console, 'log')
       this.metricRegistry.gauge('gauge', 4, { brand: 'vw' })
       this.metricRegistry.gauge('gauge', 5, { brand: 'vw' })
       this.clock.tick(24 * 60 * 60 * 1000 + 1)
       this.metricRegistry.cumulative('cumulative', 20, { brand: 'vw' })
       this.metricRegistry.logMetrics()
 
-      expect(statistic.callCount, 'to be', 1)
-      expect(statistic.args[0].length, 'to be', 1)
+      expect(this.log.callCount, 'to be', 1)
+      expect(this.log.args[0].length, 'to be', 1)
       expect(
-        statistic.args[0][0],
+        this.log.args[0][0],
         'to equal',
         JSON.stringify({
           message: 'Metric dump',
