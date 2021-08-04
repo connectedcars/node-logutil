@@ -158,6 +158,10 @@ class MetricRegistry {
       })
     }
   }
+
+  getMetric(name) {
+    return this.metrics[name]
+  }
 }
 
 let metricRegistry
