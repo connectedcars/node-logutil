@@ -166,6 +166,10 @@ class MetricRegistry {
   clearMetric(name) {
     delete this.metrics[name]
   }
+
+  getMetricNames() {
+    return Object.keys(this.metrics).sort((a, b) => a.localeCompare(b))
+  }
 }
 
 let metricRegistry
