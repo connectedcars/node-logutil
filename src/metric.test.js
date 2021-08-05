@@ -119,6 +119,7 @@ describe('src/metric.js', () => {
     })
 
     it('can get a metric by name', () => {
+      this.metricRegistry.gauge('bar', 20)
       this.metricRegistry.gauge('baz', 20)
       this.metricRegistry.gauge('baz', 30)
 
@@ -139,6 +140,33 @@ describe('src/metric.js', () => {
         labels: undefined,
         endTime: 1504273062000
       })
+    })
+
+    it('can clear a metric by name', () => {
+      this.metricRegistry.gauge('bar', 20)
+      this.metricRegistry.gauge('baz', 20)
+      this.metricRegistry.gauge('baz', 30)
+
+      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+        value: 30,
+        name: 'baz',
+        type: 'GAUGE',
+        labels: undefined,
+        endTime: 1504273062000
+      })
+
+      this.metricRegistry.clearMetric('baz')
+      const metrics = this.metricRegistry.getMetrics()
+
+      expect(metrics, 'to equal', [
+        {
+          value: 20,
+          name: 'bar',
+          type: 'GAUGE',
+          labels: undefined,
+          endTime: 1504273062000
+        }
+      ])
     })
 
     it('fails calling gauge for unknown reasons and ignores it gracefully', () => {

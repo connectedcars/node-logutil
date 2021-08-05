@@ -162,6 +162,10 @@ class MetricRegistry {
   getMetric(name) {
     return this.metrics[name]
   }
+
+  clearMetric(name) {
+    delete this.metrics[name]
+  }
 }
 
 let metricRegistry
