@@ -7,6 +7,7 @@ describe('src/metric.js', () => {
     this.createKey = sinon.spy(MetricRegistry.prototype, 'createKey')
     this.clock = sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
     this.log = sinon.stub(console, 'log')
+    this.error = sinon.stub(console, 'error')
     this.metricRegistry = new MetricRegistry()
 
     process.env.LOG_LEVEL = 'STATISTIC'
@@ -114,8 +115,157 @@ describe('src/metric.js', () => {
         name: 'baz',
         type: 'GAUGE',
         labels: null,
+        endTime: 1504273062000,
+        reducerFn: fn
+      })
+    })
+
+    it('gauge metric with reducer function should always have reducer, to avoid raceconditions', () => {
+      const fn = arr => arr.reduce((a, b) => a + b) / arr.length
+      this.metricRegistry.gauge('baz', 20, null, fn)
+      this.metricRegistry.gauge('baz', 30, null)
+      expect(this.error.callCount, 'to equal', 1)
+      expect(this.error.args, 'to equal', [
+        [
+          '{"message":"Gauge with reducer called without reducer","context":{"name":"baz"},"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+        ]
+      ])
+    })
+
+    it('gauge metric without reducer function should never have reducer, to avoid raceconditions', () => {
+      const fn = arr => arr.reduce((a, b) => a + b) / arr.length
+      this.metricRegistry.gauge('baz', 20, null)
+      this.metricRegistry.gauge('baz', 30, null, fn)
+      expect(this.error.callCount, 'to equal', 1)
+      expect(this.error.args, 'to equal', [
+        [
+          '{"message":"Gauge without reducer called with reducer","context":{"name":"baz"},"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+        ]
+      ])
+    })
+
+    it('can get a metric by name', () => {
+      this.metricRegistry.gauge('bar', 20)
+      this.metricRegistry.gauge('baz', 20)
+      this.metricRegistry.gauge('baz', 30)
+
+      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+        value: 30,
+        name: 'baz',
+        type: 'GAUGE',
+        labels: undefined,
         endTime: 1504273062000
       })
+
+      const metrics = this.metricRegistry.getMetric('baz')
+
+      expect(metrics, 'to equal', {
+        value: 30,
+        name: 'baz',
+        type: 'GAUGE',
+        labels: undefined,
+        endTime: 1504273062000
+      })
+    })
+
+    it('can get a metric by name with reducer', () => {
+      const fn = arr => arr.reduce((a, b) => a + b) / arr.length
+      this.metricRegistry.gauge('bar', 20)
+      this.metricRegistry.gauge('baz', 20, null, fn)
+      this.metricRegistry.gauge('baz', 30, null, fn)
+      this.metricRegistry.cumulative('foo', 20)
+      this.metricRegistry.cumulative('foo', 5)
+
+      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+        name: 'baz',
+        type: 'GAUGE',
+        value: [20, 30],
+        labels: null,
+        reducerFn: fn
+      })
+
+      const metrics = this.metricRegistry.getMetric('baz')
+
+      expect(metrics, 'to equal', {
+        value: 25,
+        name: 'baz',
+        type: 'GAUGE',
+        labels: null,
+        endTime: 1504273062000
+      })
+    })
+
+    it('can get a cumulative metric with time', () => {
+      const fn = arr => arr.reduce((a, b) => a + b) / arr.length
+      this.metricRegistry.gauge('bar', 20)
+      this.metricRegistry.gauge('baz', 20, null, fn)
+      this.metricRegistry.gauge('baz', 30, null, fn)
+      this.metricRegistry.cumulative('foo', 20)
+      this.metricRegistry.cumulative('foo', 5)
+
+      expect(this.metricRegistry.metrics['foo'], 'to equal', {
+        name: 'foo',
+        type: 'CUMULATIVE',
+        value: 25,
+        labels: undefined,
+        startTime: 1504273062000
+      })
+
+      const metrics = this.metricRegistry.getMetric('foo')
+
+      expect(metrics, 'to equal', {
+        name: 'foo',
+        type: 'CUMULATIVE',
+        value: 25,
+        labels: undefined,
+        startTime: 1504273062000,
+        endTime: 1504273062000
+      })
+    })
+
+    it('can clear a metric by name', () => {
+      this.metricRegistry.gauge('bar', 20)
+      this.metricRegistry.gauge('baz', 20)
+      this.metricRegistry.gauge('baz', 30)
+
+      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+        value: 30,
+        name: 'baz',
+        type: 'GAUGE',
+        labels: undefined,
+        endTime: 1504273062000
+      })
+
+      this.metricRegistry.clearMetric('baz')
+      const metrics = this.metricRegistry.getMetrics()
+
+      expect(metrics, 'to equal', [
+        {
+          value: 20,
+          name: 'bar',
+          type: 'GAUGE',
+          labels: undefined,
+          endTime: 1504273062000
+        }
+      ])
+    })
+
+    it('can get metric names', () => {
+      this.metricRegistry.gauge('bar', 20)
+      this.metricRegistry.gauge('baz', 20)
+      this.metricRegistry.gauge('baz', 30)
+
+      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+        value: 30,
+        name: 'baz',
+        type: 'GAUGE',
+        labels: undefined,
+        endTime: 1504273062000
+      })
+
+      const metrics = this.metricRegistry.getMetricNames().sort((a, b) => a.localeCompare(b))
+
+      expect(metrics, 'to equal', ['bar', 'baz'])
     })
 
     it('fails calling gauge for unknown reasons and ignores it gracefully', () => {
