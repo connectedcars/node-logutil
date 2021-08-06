@@ -53,7 +53,6 @@ class MetricRegistry {
       if (metric.reducerFn) {
         this.metrics[key].value = []
         metric.value = metric.reducerFn(metric.value)
-        delete metric.reducerFn
       }
 
       result.push(metric)
@@ -123,8 +122,18 @@ class MetricRegistry {
           this.metrics[key].reducerFn = reducerFn
         }
       } else if (metric.reducerFn) {
+        if (!reducerFn) {
+          error('Gauge with reducer called without reducer', {
+            name
+          })
+        }
         this.metrics[key].value.push(value)
       } else {
+        if (reducerFn) {
+          error('Gauge without reducer called with reducer', {
+            name
+          })
+        }
         this.metrics[key].value = value
         this.metrics[key].endTime = Date.now()
       }
@@ -160,7 +169,16 @@ class MetricRegistry {
   }
 
   getMetric(name) {
-    return this.metrics[name]
+    const metric = this.metrics[name]
+
+    const value = metric.reducerFn ? metric.reducerFn(metric.value) : metric.value
+    const res = { name: metric.name, type: metric.type, value, labels: metric.labels }
+    res.endTime = metric.endTime ? metric.endTime : Date.now()
+
+    if (res.type === metricTypes.CUMULATIVE) {
+      res.startTime = metric.startTime
+    }
+    return res
   }
 
   clearMetric(name) {
@@ -168,7 +186,7 @@ class MetricRegistry {
   }
 
   getMetricNames() {
-    return Object.keys(this.metrics).sort((a, b) => a.localeCompare(b))
+    return Object.keys(this.metrics)
   }
 }
 
