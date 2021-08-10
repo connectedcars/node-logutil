@@ -497,5 +497,13 @@ describe('src/metric.js', () => {
       expect(this.logMetrics.args[0], 'to equal', [])
       expect(this.logMetrics.args[1], 'to equal', [])
     })
+
+    it('can clear metrics without a timeout set', async () => {
+      clearMetricRegistry()
+      clearMetricRegistry()
+      getMetricRegistry()
+      clearMetricRegistry()
+      clearMetricRegistry()
+    })
   })
 })
