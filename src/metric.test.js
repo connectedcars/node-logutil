@@ -490,12 +490,20 @@ describe('src/metric.js', () => {
       // Calling the function 2 times should have no impact
       getMetricRegistry()
 
-      const registry = getMetricRegistry()
+      const registry = getMetricRegistry(undefined)
       this.clock.tick(120 * 1000)
       expect(registry.metrics, 'to equal', {})
       expect(this.logMetrics.callCount, 'to be', 3)
       expect(this.logMetrics.args[0], 'to equal', [])
       expect(this.logMetrics.args[1], 'to equal', [])
+    })
+
+    it('can clear metrics without a timeout set', async () => {
+      clearMetricRegistry()
+      clearMetricRegistry()
+      getMetricRegistry(-1)
+      clearMetricRegistry()
+      clearMetricRegistry()
     })
   })
 })
