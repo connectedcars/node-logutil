@@ -11,7 +11,7 @@ export interface GaugeMetric<K extends string> {
   name: K,
   type: 'GAUGE',
   value: number,
-
+  endTime: number //UnixTime
   labels: MetricLabels
 }
 export interface CumulativeMetric<K extends string> {
@@ -20,13 +20,13 @@ export interface CumulativeMetric<K extends string> {
   value: number,
   labels: MetricLabels
   startTime: number //UnixTime
-  EndTime: number //UnixTime
+  endTime: number //UnixTime
 }
 
 type Metrics<K extends string> = GaugeMetric<K> | CumulativeMetric<K>
 
 export class MetricRegistry {
-  public gauge(name: string, value: number, labels?: MetricLabels, reducerFn: (values: number[]) => number = null ): void
+  public gauge(name: string, value: number, labels?: MetricLabels, reducerFn?: (values: number[]) => number ): void
   cumulative(name: string, value: number, labels?: MetricLabels): void
   logMetrics(): void
   getMetric<K extends string>(name: K): Metrics<K> | undefined
