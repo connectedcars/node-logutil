@@ -11,7 +11,7 @@ export interface GaugeMetric<K extends string> {
   name: K,
   type: 'GAUGE',
   value: number,
-  EndTime: number //UnixTime
+  endTime: number //UnixTime
   labels: MetricLabels
 }
 export interface CumulativeMetric<K extends string> {
@@ -20,7 +20,7 @@ export interface CumulativeMetric<K extends string> {
   value: number,
   labels: MetricLabels
   startTime: number //UnixTime
-  EndTime: number //UnixTime
+  endTime: number //UnixTime
 }
 
 type Metrics<K extends string> = GaugeMetric<K> | CumulativeMetric<K>
