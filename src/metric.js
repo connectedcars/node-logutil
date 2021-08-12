@@ -121,21 +121,26 @@ class MetricRegistry {
         if (reducerFn) {
           this.metrics[key].reducerFn = reducerFn
         }
-      } else if (metric.reducerFn) {
-        if (!reducerFn) {
-          error('Gauge with reducer called without reducer', {
-            name
-          })
-        }
-        this.metrics[key].value.push(value)
       } else {
-        if (reducerFn) {
-          error('Gauge without reducer called with reducer', {
-            name
-          })
+        if (this.metrics[key].type !== metricTypes.GAUGE) {
+          error('Cannot add gauge with same name as existing cumulative', { name, value, labels })
         }
-        this.metrics[key].value = value
-        this.metrics[key].endTime = Date.now()
+        if (metric.reducerFn) {
+          if (!reducerFn) {
+            error('Gauge with reducer called without reducer', {
+              name
+            })
+          }
+          this.metrics[key].value.push(value)
+        } else {
+          if (reducerFn) {
+            error('Gauge without reducer called with reducer', {
+              name
+            })
+          }
+          this.metrics[key].value = value
+          this.metrics[key].endTime = Date.now()
+        }
       }
     } catch (e) {
       error('Failed logging metric', {
@@ -158,7 +163,9 @@ class MetricRegistry {
           startTime: Date.now()
         }
       }
-
+      if (this.metrics[key].type !== metricTypes.CUMULATIVE) {
+        error('Cannot add cumulative with same name as existing gauge', { name, value, labels })
+      }
       this.metrics[key].value += value
     } catch (e) {
       error('Failed logging metric', {
