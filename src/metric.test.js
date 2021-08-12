@@ -436,6 +436,77 @@ describe('src/metric.js', () => {
       )
     })
 
+    it('cumulative handles name collision', () => {
+      this.metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
+      this.metricRegistry.cumulative('foo-metric', 20, { brand: 'vw' })
+      this.metricRegistry.logMetrics()
+
+      expect(this.error.callCount, 'to be', 1)
+      expect(this.error.args, 'to equal', [
+        [
+          '{"message":"Cannot add cumulative with same name as existing gauge","context":{"name":"foo-metric","value":20,"labels":{"brand":"vw"}},"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+        ]
+      ])
+      expect(this.log.callCount, 'to be', 1)
+      expect(this.log.args[0].length, 'to be', 1)
+      expect(
+        this.log.args[0][0],
+        'to equal',
+        JSON.stringify({
+          message: 'Metric dump',
+          context: {
+            metrics: [
+              {
+                name: 'foo-metric',
+                type: 'GAUGE',
+                value: 24,
+                labels: { brand: 'vw' },
+                endTime: '2017-09-01T13:37:42.000Z'
+              }
+            ]
+          },
+          severity: 'STATISTIC',
+          timestamp: '2017-09-01T13:37:42.000Z'
+        })
+      )
+    })
+
+    it('gauge handles name collision', () => {
+      this.metricRegistry.cumulative('foo-metric', 20, { brand: 'vw' })
+      this.metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
+      this.metricRegistry.logMetrics()
+
+      expect(this.error.callCount, 'to be', 1)
+      expect(this.error.args, 'to equal', [
+        [
+          '{"message":"Cannot add gauge with same name as existing cumulative","context":{"name":"foo-metric","value":4,"labels":{"brand":"vw"}},"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
+        ]
+      ])
+      expect(this.log.callCount, 'to be', 1)
+      expect(this.log.args[0].length, 'to be', 1)
+      expect(
+        this.log.args[0][0],
+        'to equal',
+        JSON.stringify({
+          message: 'Metric dump',
+          context: {
+            metrics: [
+              {
+                name: 'foo-metric',
+                type: 'CUMULATIVE',
+                value: 4,
+                labels: { brand: 'vw' },
+                startTime: '2017-09-01T13:37:42.000Z',
+                endTime: '2017-09-01T13:37:42.000Z'
+              }
+            ]
+          },
+          severity: 'STATISTIC',
+          timestamp: '2017-09-01T13:37:42.000Z'
+        })
+      )
+    })
+
     it('does not log old metrics', () => {
       this.metricRegistry.gauge('gauge', 4, { brand: 'vw' })
       this.metricRegistry.gauge('gauge', 5, { brand: 'vw' })
