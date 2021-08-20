@@ -177,6 +177,9 @@ class MetricRegistry {
 
   getMetric(name) {
     const metric = this.metrics[name]
+    if (metric === undefined) {
+      return undefined
+    }
 
     const value = metric.reducerFn ? metric.reducerFn(metric.value) : metric.value
     const res = { name: metric.name, type: metric.type, value, labels: metric.labels }
