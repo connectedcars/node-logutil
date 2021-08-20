@@ -168,6 +168,24 @@ describe('src/metric.js', () => {
       })
     })
 
+    it('can get a nonexisting metric by name', () => {
+      this.metricRegistry.gauge('bar', 20)
+      this.metricRegistry.gauge('baz', 20)
+      this.metricRegistry.gauge('baz', 30)
+
+      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+        value: 30,
+        name: 'baz',
+        type: 'GAUGE',
+        labels: undefined,
+        endTime: 1504273062000
+      })
+
+      const metrics = this.metricRegistry.getMetric('foo')
+
+      expect(metrics, 'to equal', undefined)
+    })
+
     it('can get a metric by name with reducer', () => {
       const fn = arr => arr.reduce((a, b) => a + b) / arr.length
       this.metricRegistry.gauge('bar', 20)
