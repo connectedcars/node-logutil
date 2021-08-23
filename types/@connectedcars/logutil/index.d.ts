@@ -29,7 +29,7 @@ export class MetricRegistry {
   public gauge(name: string, value: number, labels?: MetricLabels, reducerFn?: (values: number[]) => number ): void
   cumulative(name: string, value: number, labels?: MetricLabels): void
   logMetrics(): void
-  getMetric<K extends string>(name: K): Metrics<K> | undefined
+  getMetric<K extends string>(name: K): Metrics<K>[]
   getMetrics(): Metrics<string>[]
   clearMetric(name: string): void
   getMetricNames(): string[]

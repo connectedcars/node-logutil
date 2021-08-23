@@ -159,13 +159,81 @@ describe('src/metric.js', () => {
 
       const metrics = this.metricRegistry.getMetric('baz')
 
-      expect(metrics, 'to equal', {
-        value: 30,
-        name: 'baz',
-        type: 'GAUGE',
-        labels: undefined,
-        endTime: 1504273062000
+      expect(metrics, 'to equal', [
+        {
+          value: 30,
+          name: 'baz',
+          type: 'GAUGE',
+          labels: undefined,
+          endTime: 1504273062000
+        }
+      ])
+    })
+
+    it('can get a metric by name with labels', () => {
+      this.metricRegistry.gauge('bar', 20)
+      this.metricRegistry.gauge('baz', 20, { label1: 'foo' })
+      this.metricRegistry.gauge('baz', 30, { label2: 'foo' })
+      this.metricRegistry.gauge('baz', 30, { label1: 'bar' })
+
+      expect(this.metricRegistry.metrics, 'to equal', {
+        bar: {
+          name: 'bar',
+          type: 'GAUGE',
+          value: 20,
+          labels: undefined
+        },
+        'baz-label1:foo': {
+          name: 'baz',
+          type: 'GAUGE',
+          value: 20,
+          labels: {
+            label1: 'foo'
+          }
+        },
+        'baz-label2:foo': {
+          name: 'baz',
+          type: 'GAUGE',
+          value: 30,
+          labels: {
+            label2: 'foo'
+          }
+        },
+        'baz-label1:bar': {
+          name: 'baz',
+          type: 'GAUGE',
+          value: 30,
+          labels: {
+            label1: 'bar'
+          }
+        }
       })
+
+      const metrics = this.metricRegistry.getMetric('baz')
+
+      expect(metrics, 'to equal', [
+        {
+          name: 'baz',
+          type: 'GAUGE',
+          value: 20,
+          labels: { label1: 'foo' },
+          endTime: 1504273062000
+        },
+        {
+          name: 'baz',
+          type: 'GAUGE',
+          value: 30,
+          labels: { label2: 'foo' },
+          endTime: 1504273062000
+        },
+        {
+          name: 'baz',
+          type: 'GAUGE',
+          value: 30,
+          labels: { label1: 'bar' },
+          endTime: 1504273062000
+        }
+      ])
     })
 
     it('can get a nonexisting metric by name', () => {
@@ -183,7 +251,7 @@ describe('src/metric.js', () => {
 
       const metrics = this.metricRegistry.getMetric('foo')
 
-      expect(metrics, 'to equal', undefined)
+      expect(metrics, 'to equal', [])
     })
 
     it('can get a metric by name with reducer', () => {
@@ -204,13 +272,15 @@ describe('src/metric.js', () => {
 
       const metrics = this.metricRegistry.getMetric('baz')
 
-      expect(metrics, 'to equal', {
-        value: 25,
-        name: 'baz',
-        type: 'GAUGE',
-        labels: null,
-        endTime: 1504273062000
-      })
+      expect(metrics, 'to equal', [
+        {
+          value: 25,
+          name: 'baz',
+          type: 'GAUGE',
+          labels: null,
+          endTime: 1504273062000
+        }
+      ])
     })
 
     it('can get a cumulative metric with time', () => {
@@ -231,14 +301,16 @@ describe('src/metric.js', () => {
 
       const metrics = this.metricRegistry.getMetric('foo')
 
-      expect(metrics, 'to equal', {
-        name: 'foo',
-        type: 'CUMULATIVE',
-        value: 25,
-        labels: undefined,
-        startTime: 1504273062000,
-        endTime: 1504273062000
-      })
+      expect(metrics, 'to equal', [
+        {
+          name: 'foo',
+          type: 'CUMULATIVE',
+          value: 25,
+          labels: undefined,
+          startTime: 1504273062000,
+          endTime: 1504273062000
+        }
+      ])
     })
 
     it('can clear a metric by name', () => {
