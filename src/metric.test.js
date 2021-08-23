@@ -340,6 +340,31 @@ describe('src/metric.js', () => {
       ])
     })
 
+    it('can clear a metric by name with labels', () => {
+      this.metricRegistry.gauge('bar', 20, { label1: 'foo' })
+      this.metricRegistry.gauge('baz', 20, { label2: 'bar' })
+      this.metricRegistry.gauge('baz', 30, { label1: 'foo' })
+
+      expect(this.metricRegistry.metrics, 'to equal', {
+        'bar-label1:foo': { name: 'bar', type: 'GAUGE', value: 20, labels: { label1: 'foo' } },
+        'baz-label2:bar': { name: 'baz', type: 'GAUGE', value: 20, labels: { label2: 'bar' } },
+        'baz-label1:foo': { name: 'baz', type: 'GAUGE', value: 30, labels: { label1: 'foo' } }
+      })
+
+      this.metricRegistry.clearMetric('baz')
+      const metrics = this.metricRegistry.getMetrics()
+
+      expect(metrics, 'to equal', [
+        {
+          name: 'bar',
+          type: 'GAUGE',
+          value: 20,
+          labels: { label1: 'foo' },
+          endTime: 1504273062000
+        }
+      ])
+    })
+
     it('can get metric names', () => {
       this.metricRegistry.gauge('bar', 20)
       this.metricRegistry.gauge('baz', 20)

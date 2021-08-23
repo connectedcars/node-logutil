@@ -197,7 +197,10 @@ class MetricRegistry {
   }
 
   clearMetric(name) {
-    delete this.metrics[name]
+    const metrics = Object.keys(this.metrics).filter(key => this.metrics[key].name === name)
+    for (const metricName of metrics) {
+      delete this.metrics[metricName]
+    }
   }
 
   getMetricNames() {
