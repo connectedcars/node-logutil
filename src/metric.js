@@ -176,23 +176,31 @@ class MetricRegistry {
   }
 
   getMetric(name) {
-    const metric = this.metrics[name]
-    if (metric === undefined) {
-      return undefined
+    const metrics = Object.values(this.metrics).filter(m => m.name === name)
+
+    if (metrics.length === 0) {
+      return []
     }
 
-    const value = metric.reducerFn ? metric.reducerFn(metric.value) : metric.value
-    const res = { name: metric.name, type: metric.type, value, labels: metric.labels }
-    res.endTime = metric.endTime ? metric.endTime : Date.now()
+    const res = []
+    for (const metric of metrics) {
+      const value = metric.reducerFn ? metric.reducerFn(metric.value) : metric.value
+      const filteredMetric = { name: metric.name, type: metric.type, value, labels: metric.labels }
+      filteredMetric.endTime = metric.endTime ? metric.endTime : Date.now()
 
-    if (res.type === metricTypes.CUMULATIVE) {
-      res.startTime = metric.startTime
+      if (filteredMetric.type === metricTypes.CUMULATIVE) {
+        filteredMetric.startTime = metric.startTime
+      }
+      res.push(filteredMetric)
     }
     return res
   }
 
   clearMetric(name) {
-    delete this.metrics[name]
+    const metrics = Object.keys(this.metrics).filter(key => this.metrics[key].name === name)
+    for (const metricName of metrics) {
+      delete this.metrics[metricName]
+    }
   }
 
   getMetricNames() {
