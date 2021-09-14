@@ -42,6 +42,9 @@ class MetricRegistry {
         metrics
       })
     }
+    // After dumping metrics, remove all existing metrics
+    // We don't miss out on any metrics here, because this code is purely synchronous
+    this.metrics = {}
   }
   getMetrics() {
     let result = []

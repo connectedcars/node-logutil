@@ -491,6 +491,7 @@ describe('src/metric.js', () => {
           timestamp: '2017-09-01T13:37:42.000Z'
         })
       )
+      expect(this.metricRegistry.metrics, 'to equal', {})
     })
 
     it('groups metrics by name', () => {
