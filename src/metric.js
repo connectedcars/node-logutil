@@ -54,7 +54,6 @@ class MetricRegistry {
       metric.endTime = metric.endTime ? metric.endTime : Date.now()
 
       if (metric.reducerFn) {
-        this.metrics[key].value = []
         metric.value = metric.reducerFn(metric.value)
       }
 
