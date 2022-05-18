@@ -231,7 +231,7 @@ function getMetricRegistry(delay = 60 * 1000) {
 
 const clearMetricRegistry = () => {
   if (scrapeInterval) {
-    clearInterval(scrapeInterval)
+    clearTimeout(scrapeInterval)
   }
   metricRegistry = null
 }
