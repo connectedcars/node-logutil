@@ -4,7 +4,8 @@ const logLevels = {
   WARN: 30,
   INFO: 20,
   STATISTIC: 15,
-  DEBUG: 10
+  DEBUG: 10,
+  TRACE: 5
 }
 
 const getLogLevel = () => {
@@ -30,6 +31,8 @@ const getLogLevelName = logLevel => {
       return 'STATISTIC'
     case logLevels.DEBUG:
       return 'DEBUG'
+    case logLevels.TRACE:
+      return 'TRACE'
     default:
       return 'UNKNOWN'
   }
