@@ -1,3 +1,4 @@
+export function trace(...args: any[]): void
 export function debug(...args: any[]): void
 export function statistic(...args: any[]): void
 export function info(...args: any[]): void
@@ -26,7 +27,7 @@ export interface CumulativeMetric<K extends string> {
 type Metrics<K extends string> = GaugeMetric<K> | CumulativeMetric<K>
 
 export class MetricRegistry {
-  public gauge(name: string, value: number, labels?: MetricLabels, reducerFn?: (values: number[]) => number ): void
+  public gauge(name: string, value: number, labels?: MetricLabels, reducerFn?: (values: number[]) => number): void
   cumulative(name: string, value: number, labels?: MetricLabels): void
   logMetrics(): void
   getMetric<K extends string>(name: K): Metrics<K>[]
