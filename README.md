@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/connectedcars/node-logutil.svg?branch=master)](https://travis-ci.org/connectedcars/node-logutil)
 [![Coverage Status](https://coveralls.io/repos/github/connectedcars/node-logutil/badge.svg?branch=master)](https://coveralls.io/github/connectedcars/node-logutil?branch=master)
 
-Simple log formatting for Node 6.x and 8.x
+https://wiki.connectedcars.io/en/backend/working-on-projects
 
 ## Installation
 
