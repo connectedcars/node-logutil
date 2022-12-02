@@ -6,7 +6,7 @@ export function warn(...args: any[]): void
 export function error(...args: any[]): void
 export function critical(...args: any[]): void
 
-export type MetricLabels = { [key: string]: string } | undefined
+export type MetricLabels = { [key: string]: string | number } | undefined
 
 export interface GaugeMetric<K extends string> {
   name: K,
