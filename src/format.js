@@ -1,7 +1,7 @@
 const { getLogLevelName } = require('./levels')
 
 const MAX_NESTED_DEPTH = 10
-const MAX_TEXT_LENGTH = 100 * 1024
+const MAX_TEXT_LENGTH = 70 * 1024
 
 const reachedMaxDepth = (obj, level = 0) => {
   for (const key in obj) {

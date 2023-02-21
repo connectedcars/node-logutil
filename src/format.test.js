@@ -153,15 +153,15 @@ describe('src/format', () => {
       blob += 'something!'
     }
     let msg = ''
-    for (let i = 0; i < 110; i++) {
+    for (let i = 0; i < 75; i++) {
       msg += blob
     }
     expect(
       format(logLevels.WARN, msg),
       'to match',
-      /^{"message":"Truncated: (something!){5000,}\.{3}"\,\"severity\"\:\"WARNING\",\"timestamp\"\:\"2017-09-01T13:37:42\.000Z\"}$/
+      /^{"message":"Truncated: (something!){3000,}\.{3}"\,\"severity\"\:\"WARNING\",\"timestamp\"\:\"2017-09-01T13:37:42\.000Z\"}$/
     )
-    expect(format(logLevels.WARN, msg).length, 'to be less than or equal to', 110 * 1024)
+    expect(format(logLevels.WARN, msg).length, 'to be less than or equal to', 75 * 1024)
   })
   it('formats very large data', () => {
     let blob = ''
@@ -169,15 +169,15 @@ describe('src/format', () => {
       blob += 'something!'
     }
     let data = ''
-    for (let i = 0; i < 110; i++) {
+    for (let i = 0; i < 75; i++) {
       data += blob
     }
     expect(
       format(logLevels.WARN, 'hello', data),
       'to match',
-      /^\{"message":"Truncated \{\\\"message\\\":\\\"hello\\\",\\\"data\\\":\[\\\"(something!){5000,}so.*$/
+      /^\{"message":"Truncated \{\\\"message\\\":\\\"hello\\\",\\\"data\\\":\[\\\"(something!){3000,}so.*$/
     )
-    expect(format(logLevels.WARN, 'hello', data).length, 'to be less than or equal to', 110 * 1024)
+    expect(format(logLevels.WARN, 'hello', data).length, 'to be less than or equal to', 75 * 1024)
   })
   it('formats not too deep object', () => {
     expect(
@@ -277,7 +277,7 @@ describe('src/format', () => {
     obj.circular = obj
 
     expect(format(logLevels.WARN, obj), 'to match', /^.*Truncated.*circular.*$/)
-    expect(format(logLevels.WARN, msg).length, 'to be less than or equal to', 110 * 1024)
+    expect(format(logLevels.WARN, msg).length, 'to be less than or equal to', 75 * 1024)
   })
 
   it('still throws unknown errors', () => {
