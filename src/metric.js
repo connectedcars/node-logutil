@@ -38,9 +38,11 @@ class MetricRegistry {
     }
 
     for (const metrics of Object.values(result)) {
-      statistic('Metric dump', {
-        metrics
-      })
+      while (metrics.length > 0) {
+        statistic('Metric dump', {
+          metrics: metrics.splice(0, 500)
+        })
+      }
     }
     // After dumping metrics, remove all existing metrics
     // We don't miss out on any metrics here, because this code is purely synchronous
