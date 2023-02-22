@@ -40,7 +40,7 @@ class MetricRegistry {
     for (const metrics of Object.values(result)) {
       while (metrics.length > 0) {
         statistic('Metric dump', {
-          metrics: metrics.splice(0, 500)
+          metrics: metrics.splice(0, 250)
         })
       }
     }

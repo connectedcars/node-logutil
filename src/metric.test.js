@@ -494,19 +494,19 @@ describe('src/metric.js', () => {
       expect(this.metricRegistry.metrics, 'to equal', {})
     })
 
-    it('logs metrics in batches of 500', () => {
-      for (let i = 0; i < 1100; i++) {
+    it('logs metrics in batches of 250', () => {
+      for (let i = 0; i < 600; i++) {
         this.metricRegistry.gauge('gauge', 4, { brand: `vw${i}` })
       }
       this.metricRegistry.logMetrics()
 
       expect(this.log.callCount, 'to be', 3)
       expect(this.log.args[0][0], 'to match', /vw0/)
-      expect(this.log.args[0][0], 'to match', /vw499/)
-      expect(this.log.args[1][0], 'to match', /vw500/)
-      expect(this.log.args[1][0], 'to match', /vw999/)
-      expect(this.log.args[2][0], 'to match', /vw1000/)
-      expect(this.log.args[2][0], 'to match', /vw1099/)
+      expect(this.log.args[0][0], 'to match', /vw249/)
+      expect(this.log.args[1][0], 'to match', /vw250/)
+      expect(this.log.args[1][0], 'to match', /vw499/)
+      expect(this.log.args[2][0], 'to match', /vw500/)
+      expect(this.log.args[2][0], 'to match', /vw599/)
 
       expect(this.metricRegistry.metrics, 'to equal', {})
     })
