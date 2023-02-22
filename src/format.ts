@@ -1,9 +1,10 @@
-const { getLogLevelName } = require('./levels')
+import { getLogLevelName } from './levels'
 
 const MAX_NESTED_DEPTH = 10
 const MAX_TEXT_LENGTH = 70 * 1024
 
-const reachedMaxDepth = (obj, level = 0) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function reachedMaxDepth(obj: any, level = 0): boolean {
   for (const key in obj) {
     if (typeof obj[key] == 'object') {
       level++
@@ -13,26 +14,30 @@ const reachedMaxDepth = (obj, level = 0) => {
   return false
 }
 
-const depthLimited = contents => {
-  return stripStringify({
-    message: 'Depth limited ' + contents
-  })
+function depthLimited(contents: string): string {
+  return stripStringify({ message: 'Depth limited ' + contents })
 }
 
-const lengthLimited = contents => {
-  let truncated = contents.substring(0, MAX_TEXT_LENGTH)
+function lengthLimited(contents: string): string {
+  const truncated = contents.substring(0, MAX_TEXT_LENGTH)
   return stripStringify({ message: 'Truncated ' + truncated })
 }
 
-const stripStringify = (mixedContent, walkerFunction) => {
+function stripStringify(
+  mixedContent: Parameters<typeof JSON.stringify>[0],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  walkerFunction?: (objKey: any, objValue: string) => any
+): string {
   // this stops logs with multiline content being split into seperate entries on gcloud
   return JSON.stringify(mixedContent, walkerFunction).replace(/\\n/g, '\\n')
 }
 
-const formatError = err => {
-  const errObj = {}
+function formatError(err: Error): Record<string, unknown> {
+  const errObj: Record<string, unknown> = {}
 
   for (const errKey of Object.getOwnPropertyNames(err)) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     errObj[errKey] = err[errKey]
   }
 
@@ -41,8 +46,8 @@ const formatError = err => {
   return errObj
 }
 
-const formatContext = context => {
-  const newContext = {}
+function formatContext(context: Record<string, unknown>): Record<string, unknown> {
+  const newContext: Record<string, unknown> = {}
   for (const key of Object.keys(context)) {
     const val = context[key]
 
@@ -57,8 +62,8 @@ const formatContext = context => {
   return newContext
 }
 
-const format = (level, ...args) => {
-  let output = {
+export function format(level: number, ...args: unknown[]): string {
+  const output: Record<string, unknown> & { message?: string; context?: Record<string, unknown>; data?: unknown[] } = {
     message: '',
     context: {},
     data: []
@@ -79,25 +84,25 @@ const format = (level, ...args) => {
       } else if (args[0] instanceof Object) {
         // Override logging output for objects (and errors)
         for (const key of Object.getOwnPropertyNames(args[0])) {
-          output[key] = args[0][key]
+          output[key] = (args[0] as Record<string, unknown>)[key]
         }
       } else {
         // Set primitive types as the message
-        output.message = args[0]
+        output.message = `${args[0]}`
       }
       if (args.length > 1) {
         if (args[1] instanceof Object) {
           // Set objects as secondary arguments as the context
-          output.context = formatContext(args[1])
+          output.context = formatContext(args[1] as Record<string, unknown>)
         } else {
           // Set all other types as data
-          output.data.push(args[1])
+          output.data?.push(args[1])
         }
       }
       if (args.length > 2) {
         for (let i = 2; i < args.length; i++) {
           // Set additional arguments as data
-          output.data.push(args[i])
+          output.data?.push(args[i])
         }
       }
     }
@@ -105,11 +110,11 @@ const format = (level, ...args) => {
       // Remove empty messages
       delete output.message
     }
-    if (Object.keys(output.context).length === 0) {
+    if (output.context && Object.keys(output.context).length === 0) {
       // Remove empty contexts
       delete output.context
     }
-    if (output.data.length === 0) {
+    if (output.data?.length === 0) {
       // Remove empty data
       delete output.data
     }
@@ -145,9 +150,10 @@ const format = (level, ...args) => {
       */
 
       // keep track of object values, so we know if they occur twice (circular reference)
-      let seenValues = []
+      const seenValues: string[] = []
 
-      var valueChecker = function(objKey, objValue) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const valueChecker = function (objKey: any, objValue: string): any {
         if (objValue !== null && typeof objValue === 'object') {
           if (seenValues.indexOf(objValue) > -1) {
             // let it be logged that there was something sanitized
@@ -161,7 +167,7 @@ const format = (level, ...args) => {
         return objValue
       }
 
-      let returnBlob = stripStringify(output, valueChecker)
+      const returnBlob = stripStringify(output, valueChecker)
 
       // still we want to curtail too long logs
       if (returnBlob.length >= MAX_TEXT_LENGTH) {
@@ -187,9 +193,4 @@ const format = (level, ...args) => {
       throw err
     }
   }
-}
-
-module.exports = {
-  format,
-  reachedMaxDepth
 }

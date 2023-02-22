@@ -1,80 +1,81 @@
-const expect = require('unexpected')
-const { logLevels, getLogLevel, getLogLevelName } = require('./levels')
+import { EnvStub } from '@connectedcars/test'
+
+import { getLogLevel, getLogLevelName, logLevels } from './levels'
 
 describe('src/levels', () => {
   describe('getLogLevel', () => {
+    let env: EnvStub
     beforeEach(() => {
-      this.oldLogLevel = process.env.LOG_LEVEL
-      delete process.env.LOG_LEVEL
+      env = new EnvStub(['LOG_LEVEL'])
     })
     afterEach(() => {
-      process.env.LOG_LEVEL = this.oldLogLevel
+      env.restore()
     })
 
     it('defaults to WARN', () => {
-      expect(getLogLevel(), 'to be', logLevels.WARN)
+      expect(getLogLevel()).toEqual(logLevels.WARN)
     })
     it('defaults to WARN for empty string', () => {
       process.env.LOG_LEVEL = ''
-      expect(getLogLevel(), 'to be', logLevels.WARN)
+      expect(getLogLevel()).toEqual(logLevels.WARN)
     })
     it('has environment set to DEBUG', () => {
       process.env.LOG_LEVEL = 'DEBUG'
-      expect(getLogLevel(), 'to be', logLevels.DEBUG)
+      expect(getLogLevel()).toEqual(logLevels.DEBUG)
     })
     it('has environment set to STATISTIC', () => {
       process.env.LOG_LEVEL = 'STATISTIC'
-      expect(getLogLevel(), 'to be', logLevels.STATISTIC)
+      expect(getLogLevel()).toEqual(logLevels.STATISTIC)
     })
     it('has environment set to INFO', () => {
       process.env.LOG_LEVEL = 'INFO'
-      expect(getLogLevel(), 'to be', logLevels.INFO)
+      expect(getLogLevel()).toEqual(logLevels.INFO)
     })
     it('has environment set to WARN', () => {
       process.env.LOG_LEVEL = 'WARN'
-      expect(getLogLevel(), 'to be', logLevels.WARN)
+      expect(getLogLevel()).toEqual(logLevels.WARN)
     })
     it('has environment set to ERROR', () => {
       process.env.LOG_LEVEL = 'ERROR'
-      expect(getLogLevel(), 'to be', logLevels.ERROR)
+      expect(getLogLevel()).toEqual(logLevels.ERROR)
     })
     it('has environment set to CRITICAL', () => {
       process.env.LOG_LEVEL = 'CRITICAL'
-      expect(getLogLevel(), 'to be', logLevels.CRITICAL)
+      expect(getLogLevel()).toEqual(logLevels.CRITICAL)
     })
     it('has environment set to lowercase', () => {
       process.env.LOG_LEVEL = 'error'
-      expect(getLogLevel(), 'to be', logLevels.ERROR)
+      expect(getLogLevel()).toEqual(logLevels.ERROR)
     })
     it('has environment set to mixed case', () => {
       process.env.LOG_LEVEL = 'Warn'
-      expect(getLogLevel(), 'to be', logLevels.WARN)
+      expect(getLogLevel()).toEqual(logLevels.WARN)
     })
   })
   describe('getLogLevelName', () => {
     it('gets CRITICAL', () => {
-      expect(getLogLevelName(50), 'to be', 'CRITICAL')
+      expect(getLogLevelName(50)).toEqual('CRITICAL')
     })
     it('gets ERROR', () => {
-      expect(getLogLevelName(40), 'to be', 'ERROR')
+      expect(getLogLevelName(40)).toEqual('ERROR')
     })
     it('gets WARN', () => {
-      expect(getLogLevelName(30), 'to be', 'WARNING')
+      expect(getLogLevelName(30)).toEqual('WARNING')
     })
     it('gets INFO', () => {
-      expect(getLogLevelName(20), 'to be', 'INFO')
+      expect(getLogLevelName(20)).toEqual('INFO')
     })
     it('gets STATISTIC', () => {
-      expect(getLogLevelName(15), 'to be', 'STATISTIC')
+      expect(getLogLevelName(15)).toEqual('STATISTIC')
     })
     it('gets DEBUG', () => {
-      expect(getLogLevelName(10), 'to be', 'DEBUG')
+      expect(getLogLevelName(10)).toEqual('DEBUG')
     })
     it('gets UNKNOWN for invalid level', () => {
-      expect(getLogLevelName(1337), 'to be', 'UNKNOWN')
+      expect(getLogLevelName(1337)).toEqual('UNKNOWN')
     })
     it('gets UNKNOWN for no level', () => {
-      expect(getLogLevelName(), 'to be', 'UNKNOWN')
+      expect(getLogLevelName(0)).toEqual('UNKNOWN')
     })
   })
 })
