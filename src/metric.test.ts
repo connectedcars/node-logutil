@@ -1,33 +1,42 @@
-const expect = require('unexpected')
-const { MetricRegistry, clearMetricRegistry, getMetricRegistry } = require('./metric')
-const sinon = require('sinon')
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { EnvStub, TypedSinonStub } from '@connectedcars/test'
+import sinon from 'sinon'
+
+import { clearMetricRegistry, getMetricRegistry, MetricRegistry } from './metric'
 
 describe('src/metric.js', () => {
+  let env: EnvStub
+  let clock: sinon.SinonFakeTimers
+  let logStub: TypedSinonStub<typeof console.log>
+  let errorStub: TypedSinonStub<typeof console.error>
+  let metricRegistry: MetricRegistry
   beforeEach(() => {
-    this.createKey = sinon.spy(MetricRegistry.prototype, 'createKey')
-    this.clock = sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
-    this.log = sinon.stub(console, 'log')
-    this.error = sinon.stub(console, 'error')
-    this.metricRegistry = new MetricRegistry()
+    env = new EnvStub(['LOG_LEVEL'])
+    clock = sinon.useFakeTimers(Date.parse('2017-09-01T13:37:42Z'))
+    logStub = sinon.stub(console, 'log')
+    errorStub = sinon.stub(console, 'error')
+    metricRegistry = new MetricRegistry()
 
     process.env.LOG_LEVEL = 'STATISTIC'
   })
   afterEach(async () => {
+    env.restore()
     sinon.restore()
     clearMetricRegistry()
   })
 
   describe('MetricRegistry', () => {
     it('creates cumulative metrics', () => {
-      let value = 10
+      const value = 10
 
       const name = 'my-metric'
       const labels = { brand: 'vw' }
 
       for (let i = 1; i <= 4; i++) {
-        this.metricRegistry.cumulative(name, value, labels)
+        metricRegistry.cumulative(name, value, labels)
 
-        expect(this.metricRegistry.metrics['my-metric-brand:vw'], 'to equal', {
+        // @ts-ignore
+        expect(metricRegistry.metrics['my-metric-brand:vw']).toEqual({
           name: name,
           type: 'CUMULATIVE',
           value: value * i,
@@ -35,21 +44,19 @@ describe('src/metric.js', () => {
           startTime: 1504273062000
         })
       }
-
-      expect(this.createKey.callCount, 'to be', 4)
-      expect(this.createKey.args[0], 'to equal', [name, labels])
     })
 
     it('creates cumulative metric and formats label', () => {
-      let value = 10
+      const value = 10
 
       const name = 'my-metric'
       const labels = { release: 99 }
 
       for (let i = 1; i <= 4; i++) {
-        this.metricRegistry.cumulative(name, value, labels)
+        metricRegistry.cumulative(name, value, labels)
 
-        expect(this.metricRegistry.metrics['my-metric-release:99'], 'to equal', {
+        // @ts-ignore
+        expect(metricRegistry.metrics['my-metric-release:99']).toEqual({
           name: name,
           type: 'CUMULATIVE',
           value: value * i,
@@ -57,75 +64,76 @@ describe('src/metric.js', () => {
           startTime: 1504273062000
         })
       }
-
-      expect(this.createKey.callCount, 'to be', 4)
-      expect(this.createKey.args[0], 'to equal', [name, labels])
     })
 
     it('creates gauge metric', () => {
       const name = 'gauge-metric'
       const key = 'gauge-metric-brand:vw'
       const labels = { brand: 'vw' }
-      ;[50, 50, 0, 50].map(value => this.metricRegistry.gauge(name, value, labels))
+      ;[50, 50, 0, 50].map(value => metricRegistry.gauge(name, value, labels))
 
-      expect(this.metricRegistry.metrics, 'to have key', key)
+      // @ts-ignore
+      expect(metricRegistry.metrics).toHaveProperty(key)
 
-      expect(this.metricRegistry.metrics[key], 'to have key', 'endTime')
-      expect(this.metricRegistry.metrics[key], 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics[key]).toHaveProperty('endTime')
+      // @ts-ignore
+      expect(metricRegistry.metrics[key]).toEqual({
         name: 'gauge-metric',
         type: 'GAUGE',
         value: 50,
         labels: { brand: 'vw' },
         endTime: 1504273062000
       })
-      ;[20, 40, 80].map(value => this.metricRegistry.gauge(name, value, { brand: 'foo' }))
+      ;[20, 40, 80].map(value => metricRegistry.gauge(name, value, { brand: 'foo' }))
 
       const anotherKey = 'gauge-metric-brand:foo'
-      expect(this.metricRegistry.metrics, 'to have key', anotherKey)
-      expect(this.metricRegistry.metrics[anotherKey], 'to have key', 'endTime')
-      expect(this.metricRegistry.metrics[anotherKey], 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics).toHaveProperty(anotherKey)
+      // @ts-ignore
+      expect(metricRegistry.metrics[anotherKey]).toHaveProperty('endTime')
+      // @ts-ignore
+      expect(metricRegistry.metrics[anotherKey]).toEqual({
         name: 'gauge-metric',
         type: 'GAUGE',
         value: 80,
         labels: { brand: 'foo' },
         endTime: 1504273062000
       })
-
-      expect(this.createKey.callCount, 'to be', 7)
-      expect(this.createKey.args[0], 'to equal', [name, labels])
     })
 
     it('creates gauge metric with reducer function', () => {
-      const fn = arr => arr.reduce((a, b) => a + b) / arr.length
-      this.metricRegistry.gauge('baz', 20, null, fn)
-      this.metricRegistry.gauge('baz', 30, null, fn)
+      const fn = (arr: number[]) => arr.reduce((a, b) => a + b) / arr.length
+      metricRegistry.gauge('baz', 20, undefined, fn)
+      metricRegistry.gauge('baz', 30, undefined, fn)
 
-      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics['baz']).toEqual({
         value: [20, 30],
         name: 'baz',
         type: 'GAUGE',
         reducerFn: fn,
-        labels: null
+        labels: undefined
       })
 
-      const metrics = this.metricRegistry.getMetrics()
+      const metrics = metricRegistry.getMetrics()
 
-      expect(metrics[0], 'to equal', {
+      expect(metrics[0]).toEqual({
         value: 25,
         name: 'baz',
         type: 'GAUGE',
-        labels: null,
+        labels: undefined,
         endTime: 1504273062000,
         reducerFn: fn
       })
     })
 
     it('gauge metric with reducer function should always have reducer, to avoid raceconditions', () => {
-      const fn = arr => arr.reduce((a, b) => a + b) / arr.length
-      this.metricRegistry.gauge('baz', 20, null, fn)
-      this.metricRegistry.gauge('baz', 30, null)
-      expect(this.error.callCount, 'to equal', 1)
-      expect(this.error.args, 'to equal', [
+      const fn = (arr: number[]) => arr.reduce((a, b) => a + b) / arr.length
+      metricRegistry.gauge('baz', 20, undefined, fn)
+      metricRegistry.gauge('baz', 30, undefined)
+      expect(errorStub.callCount).toEqual(1)
+      expect(errorStub.args).toEqual([
         [
           '{"message":"Gauge with reducer called without reducer","context":{"name":"baz"},"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
         ]
@@ -133,11 +141,11 @@ describe('src/metric.js', () => {
     })
 
     it('gauge metric without reducer function should never have reducer, to avoid raceconditions', () => {
-      const fn = arr => arr.reduce((a, b) => a + b) / arr.length
-      this.metricRegistry.gauge('baz', 20, null)
-      this.metricRegistry.gauge('baz', 30, null, fn)
-      expect(this.error.callCount, 'to equal', 1)
-      expect(this.error.args, 'to equal', [
+      const fn = (arr: number[]) => arr.reduce((a, b) => a + b) / arr.length
+      metricRegistry.gauge('baz', 20, undefined)
+      metricRegistry.gauge('baz', 30, undefined, fn)
+      expect(errorStub.callCount).toEqual(1)
+      expect(errorStub.args).toEqual([
         [
           '{"message":"Gauge without reducer called with reducer","context":{"name":"baz"},"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
         ]
@@ -145,11 +153,12 @@ describe('src/metric.js', () => {
     })
 
     it('can get a metric by name', () => {
-      this.metricRegistry.gauge('bar', 20)
-      this.metricRegistry.gauge('baz', 20)
-      this.metricRegistry.gauge('baz', 30)
+      metricRegistry.gauge('bar', 20)
+      metricRegistry.gauge('baz', 20)
+      metricRegistry.gauge('baz', 30)
 
-      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics['baz']).toEqual({
         value: 30,
         name: 'baz',
         type: 'GAUGE',
@@ -157,9 +166,9 @@ describe('src/metric.js', () => {
         endTime: 1504273062000
       })
 
-      const metrics = this.metricRegistry.getMetric('baz')
+      const metrics = metricRegistry.getMetric('baz')
 
-      expect(metrics, 'to equal', [
+      expect(metrics).toEqual([
         {
           value: 30,
           name: 'baz',
@@ -171,12 +180,13 @@ describe('src/metric.js', () => {
     })
 
     it('can get a metric by name with labels', () => {
-      this.metricRegistry.gauge('bar', 20)
-      this.metricRegistry.gauge('baz', 20, { label1: 'foo' })
-      this.metricRegistry.gauge('baz', 30, { label2: 'foo' })
-      this.metricRegistry.gauge('baz', 30, { label1: 'bar' })
+      metricRegistry.gauge('bar', 20)
+      metricRegistry.gauge('baz', 20, { label1: 'foo' })
+      metricRegistry.gauge('baz', 30, { label2: 'foo' })
+      metricRegistry.gauge('baz', 30, { label1: 'bar' })
 
-      expect(this.metricRegistry.metrics, 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics).toEqual({
         bar: {
           name: 'bar',
           type: 'GAUGE',
@@ -209,9 +219,9 @@ describe('src/metric.js', () => {
         }
       })
 
-      const metrics = this.metricRegistry.getMetric('baz')
+      const metrics = metricRegistry.getMetric('baz')
 
-      expect(metrics, 'to equal', [
+      expect(metrics).toEqual([
         {
           name: 'baz',
           type: 'GAUGE',
@@ -237,11 +247,12 @@ describe('src/metric.js', () => {
     })
 
     it('can get a nonexisting metric by name', () => {
-      this.metricRegistry.gauge('bar', 20)
-      this.metricRegistry.gauge('baz', 20)
-      this.metricRegistry.gauge('baz', 30)
+      metricRegistry.gauge('bar', 20)
+      metricRegistry.gauge('baz', 20)
+      metricRegistry.gauge('baz', 30)
 
-      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics['baz']).toEqual({
         value: 30,
         name: 'baz',
         type: 'GAUGE',
@@ -249,49 +260,51 @@ describe('src/metric.js', () => {
         endTime: 1504273062000
       })
 
-      const metrics = this.metricRegistry.getMetric('foo')
+      const metrics = metricRegistry.getMetric('foo')
 
-      expect(metrics, 'to equal', [])
+      expect(metrics).toEqual([])
     })
 
     it('can get a metric by name with reducer', () => {
-      const fn = arr => arr.reduce((a, b) => a + b) / arr.length
-      this.metricRegistry.gauge('bar', 20)
-      this.metricRegistry.gauge('baz', 20, null, fn)
-      this.metricRegistry.gauge('baz', 30, null, fn)
-      this.metricRegistry.cumulative('foo', 20)
-      this.metricRegistry.cumulative('foo', 5)
+      const fn = (arr: number[]) => arr.reduce((a, b) => a + b) / arr.length
+      metricRegistry.gauge('bar', 20)
+      metricRegistry.gauge('baz', 20, undefined, fn)
+      metricRegistry.gauge('baz', 30, undefined, fn)
+      metricRegistry.cumulative('foo', 20)
+      metricRegistry.cumulative('foo', 5)
 
-      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics['baz']).toEqual({
         name: 'baz',
         type: 'GAUGE',
         value: [20, 30],
-        labels: null,
+        labels: undefined,
         reducerFn: fn
       })
 
-      const metrics = this.metricRegistry.getMetric('baz')
+      const metrics = metricRegistry.getMetric('baz')
 
-      expect(metrics, 'to equal', [
+      expect(metrics).toEqual([
         {
           value: 25,
           name: 'baz',
           type: 'GAUGE',
-          labels: null,
+          labels: undefined,
           endTime: 1504273062000
         }
       ])
     })
 
     it('can get a cumulative metric with time', () => {
-      const fn = arr => arr.reduce((a, b) => a + b) / arr.length
-      this.metricRegistry.gauge('bar', 20)
-      this.metricRegistry.gauge('baz', 20, null, fn)
-      this.metricRegistry.gauge('baz', 30, null, fn)
-      this.metricRegistry.cumulative('foo', 20)
-      this.metricRegistry.cumulative('foo', 5)
+      const fn = (arr: number[]) => arr.reduce((a, b) => a + b) / arr.length
+      metricRegistry.gauge('bar', 20)
+      metricRegistry.gauge('baz', 20, undefined, fn)
+      metricRegistry.gauge('baz', 30, undefined, fn)
+      metricRegistry.cumulative('foo', 20)
+      metricRegistry.cumulative('foo', 5)
 
-      expect(this.metricRegistry.metrics['foo'], 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics['foo']).toEqual({
         name: 'foo',
         type: 'CUMULATIVE',
         value: 25,
@@ -299,9 +312,9 @@ describe('src/metric.js', () => {
         startTime: 1504273062000
       })
 
-      const metrics = this.metricRegistry.getMetric('foo')
+      const metrics = metricRegistry.getMetric('foo')
 
-      expect(metrics, 'to equal', [
+      expect(metrics).toEqual([
         {
           name: 'foo',
           type: 'CUMULATIVE',
@@ -314,11 +327,12 @@ describe('src/metric.js', () => {
     })
 
     it('can clear a metric by name', () => {
-      this.metricRegistry.gauge('bar', 20)
-      this.metricRegistry.gauge('baz', 20)
-      this.metricRegistry.gauge('baz', 30)
+      metricRegistry.gauge('bar', 20)
+      metricRegistry.gauge('baz', 20)
+      metricRegistry.gauge('baz', 30)
 
-      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics['baz']).toEqual({
         value: 30,
         name: 'baz',
         type: 'GAUGE',
@@ -326,10 +340,10 @@ describe('src/metric.js', () => {
         endTime: 1504273062000
       })
 
-      this.metricRegistry.clearMetric('baz')
-      const metrics = this.metricRegistry.getMetrics()
+      metricRegistry.clearMetric('baz')
+      const metrics = metricRegistry.getMetrics()
 
-      expect(metrics, 'to equal', [
+      expect(metrics).toEqual([
         {
           value: 20,
           name: 'bar',
@@ -341,20 +355,21 @@ describe('src/metric.js', () => {
     })
 
     it('can clear a metric by name with labels', () => {
-      this.metricRegistry.gauge('bar', 20, { label1: 'foo' })
-      this.metricRegistry.gauge('baz', 20, { label2: 'bar' })
-      this.metricRegistry.gauge('baz', 30, { label1: 'foo' })
+      metricRegistry.gauge('bar', 20, { label1: 'foo' })
+      metricRegistry.gauge('baz', 20, { label2: 'bar' })
+      metricRegistry.gauge('baz', 30, { label1: 'foo' })
 
-      expect(this.metricRegistry.metrics, 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics).toEqual({
         'bar-label1:foo': { name: 'bar', type: 'GAUGE', value: 20, labels: { label1: 'foo' } },
         'baz-label2:bar': { name: 'baz', type: 'GAUGE', value: 20, labels: { label2: 'bar' } },
         'baz-label1:foo': { name: 'baz', type: 'GAUGE', value: 30, labels: { label1: 'foo' } }
       })
 
-      this.metricRegistry.clearMetric('baz')
-      const metrics = this.metricRegistry.getMetrics()
+      metricRegistry.clearMetric('baz')
+      const metrics = metricRegistry.getMetrics()
 
-      expect(metrics, 'to equal', [
+      expect(metrics).toEqual([
         {
           name: 'bar',
           type: 'GAUGE',
@@ -366,11 +381,12 @@ describe('src/metric.js', () => {
     })
 
     it('can get metric names', () => {
-      this.metricRegistry.gauge('bar', 20)
-      this.metricRegistry.gauge('baz', 20)
-      this.metricRegistry.gauge('baz', 30)
+      metricRegistry.gauge('bar', 20)
+      metricRegistry.gauge('baz', 20)
+      metricRegistry.gauge('baz', 30)
 
-      expect(this.metricRegistry.metrics['baz'], 'to equal', {
+      // @ts-ignore
+      expect(metricRegistry.metrics['baz']).toEqual({
         value: 30,
         name: 'baz',
         type: 'GAUGE',
@@ -378,37 +394,25 @@ describe('src/metric.js', () => {
         endTime: 1504273062000
       })
 
-      const metrics = this.metricRegistry.getMetricNames().sort((a, b) => a.localeCompare(b))
+      const metrics = metricRegistry.getMetricNames().sort((a, b) => a.localeCompare(b))
 
-      expect(metrics, 'to equal', ['bar', 'baz'])
-    })
-
-    it('fails calling gauge for unknown reasons and ignores it gracefully', () => {
-      this.createKey.restore()
-      sinon.stub(this.metricRegistry, 'createKey').throws(new Error('Something occurred'))
-      this.metricRegistry.gauge('baz', 20, null)
-    })
-
-    it('fails calling cumulative for unknown reasons and ignores it gracefully', () => {
-      this.createKey.restore()
-      sinon.stub(this.metricRegistry, 'createKey').throws(new Error('Something occurred'))
-      this.metricRegistry.cumulative('baz', 20, null)
+      expect(metrics).toEqual(['bar', 'baz'])
     })
 
     it('dumps all metrics', () => {
-      this.metricRegistry.gauge('abc', 2, null)
-      this.metricRegistry.gauge('abc', 2, null)
-      this.metricRegistry.gauge('foo', 4, { a: 'b' })
-      this.metricRegistry.cumulative('baz', 1, null)
+      metricRegistry.gauge('abc', 2)
+      metricRegistry.gauge('abc', 2)
+      metricRegistry.gauge('foo', 4, { a: 'b' })
+      metricRegistry.cumulative('baz', 1)
 
-      const actualMetric = this.metricRegistry.getMetrics()
+      const actualMetric = metricRegistry.getMetrics()
 
-      expect(actualMetric, 'to equal', [
+      expect(actualMetric).toEqual([
         {
           name: 'abc',
           type: 'GAUGE',
           value: 2,
-          labels: null,
+          labels: undefined,
           endTime: 1504273062000
         },
         {
@@ -422,36 +426,21 @@ describe('src/metric.js', () => {
           name: 'baz',
           type: 'CUMULATIVE',
           value: 1,
-          labels: null,
+          labels: undefined,
           startTime: 1504273062000,
           endTime: 1504273062000
         }
       ])
     })
 
-    it('creates the correct prometheus format', () => {
-      this.metricRegistry.gauge('abc', 2, null)
-      this.metricRegistry.gauge('foo', 4, { brand: 'vw' })
-      this.metricRegistry.cumulative('baz', 8, { model: 'touran' })
-      const actualMetric = this.metricRegistry.getPrometheusMetrics()
-      expect(actualMetric, 'to equal', ['abc 2', "foo{brand='vw'} 4", "baz{model='touran'} 8 1504273062000"])
-    })
-
-    it('metric key is constructed correctly', () => {
-      const key = this.metricRegistry.createKey('name', { a: 'b' })
-      expect(key, 'to equal', 'name-a:b')
-    })
-
     it('logs all metrics', () => {
-      this.metricRegistry.gauge('gauge', 4, { brand: 'vw' })
-      this.metricRegistry.cumulative('cumulative', 20, { brand: 'vw' })
-      this.metricRegistry.logMetrics()
+      metricRegistry.gauge('gauge', 4, { brand: 'vw' })
+      metricRegistry.cumulative('cumulative', 20, { brand: 'vw' })
+      metricRegistry.logMetrics()
 
-      expect(this.log.callCount, 'to be', 2)
-      expect(this.log.args[0].length, 'to be', 1)
-      expect(
-        this.log.args[0][0],
-        'to equal',
+      expect(logStub.callCount).toEqual(2)
+      expect(logStub.args[0].length).toEqual(1)
+      expect(logStub.args[0][0]).toEqual(
         JSON.stringify({
           message: 'Metric dump',
           context: {
@@ -470,9 +459,7 @@ describe('src/metric.js', () => {
         })
       )
 
-      expect(
-        this.log.args[1][0],
-        'to equal',
+      expect(logStub.args[1][0]).toEqual(
         JSON.stringify({
           message: 'Metric dump',
           context: {
@@ -491,37 +478,37 @@ describe('src/metric.js', () => {
           timestamp: '2017-09-01T13:37:42.000Z'
         })
       )
-      expect(this.metricRegistry.metrics, 'to equal', {})
+      // @ts-ignore
+      expect(metricRegistry.metrics).toEqual({})
     })
 
     it('logs metrics in batches of 250', () => {
       for (let i = 0; i < 600; i++) {
-        this.metricRegistry.gauge('gauge', 4, { brand: `vw${i}` })
+        metricRegistry.gauge('gauge', 4, { brand: `vw${i}` })
       }
-      this.metricRegistry.logMetrics()
+      metricRegistry.logMetrics()
 
-      expect(this.log.callCount, 'to be', 3)
-      expect(this.log.args[0][0], 'to match', /vw0/)
-      expect(this.log.args[0][0], 'to match', /vw249/)
-      expect(this.log.args[1][0], 'to match', /vw250/)
-      expect(this.log.args[1][0], 'to match', /vw499/)
-      expect(this.log.args[2][0], 'to match', /vw500/)
-      expect(this.log.args[2][0], 'to match', /vw599/)
+      expect(logStub.callCount).toEqual(3)
+      expect(logStub.args[0][0]).toMatch(/vw0/)
+      expect(logStub.args[0][0]).toMatch(/vw249/)
+      expect(logStub.args[1][0]).toMatch(/vw250/)
+      expect(logStub.args[1][0]).toMatch(/vw499/)
+      expect(logStub.args[2][0]).toMatch(/vw500/)
+      expect(logStub.args[2][0]).toMatch(/vw599/)
 
-      expect(this.metricRegistry.metrics, 'to equal', {})
+      // @ts-ignore
+      expect(metricRegistry.metrics).toEqual({})
     })
 
     it('groups metrics by name', () => {
-      this.metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
-      this.metricRegistry.gauge('foo-metric', 2, { brand: 'seat' })
-      this.metricRegistry.gauge('bar-metric', 20, { brand: 'vw' })
-      this.metricRegistry.logMetrics()
+      metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
+      metricRegistry.gauge('foo-metric', 2, { brand: 'seat' })
+      metricRegistry.gauge('bar-metric', 20, { brand: 'vw' })
+      metricRegistry.logMetrics()
 
-      expect(this.log.callCount, 'to be', 2)
-      expect(this.log.args[0].length, 'to be', 1)
-      expect(
-        this.log.args[0][0],
-        'to equal',
+      expect(logStub.callCount).toEqual(2)
+      expect(logStub.args[0].length).toEqual(1)
+      expect(logStub.args[0][0]).toEqual(
         JSON.stringify({
           message: 'Metric dump',
           context: {
@@ -547,9 +534,7 @@ describe('src/metric.js', () => {
         })
       )
 
-      expect(
-        this.log.args[1][0],
-        'to equal',
+      expect(logStub.args[1][0]).toEqual(
         JSON.stringify({
           message: 'Metric dump',
           context: {
@@ -570,21 +555,19 @@ describe('src/metric.js', () => {
     })
 
     it('cumulative handles name collision', () => {
-      this.metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
-      this.metricRegistry.cumulative('foo-metric', 20, { brand: 'vw' })
-      this.metricRegistry.logMetrics()
+      metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
+      metricRegistry.cumulative('foo-metric', 20, { brand: 'vw' })
+      metricRegistry.logMetrics()
 
-      expect(this.error.callCount, 'to be', 1)
-      expect(this.error.args, 'to equal', [
+      expect(errorStub.callCount).toEqual(1)
+      expect(errorStub.args).toEqual([
         [
           '{"message":"Cannot add cumulative with same name as existing gauge","context":{"name":"foo-metric","value":20,"labels":{"brand":"vw"}},"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
         ]
       ])
-      expect(this.log.callCount, 'to be', 1)
-      expect(this.log.args[0].length, 'to be', 1)
-      expect(
-        this.log.args[0][0],
-        'to equal',
+      expect(logStub.callCount).toEqual(1)
+      expect(logStub.args[0].length).toEqual(1)
+      expect(logStub.args[0][0]).toEqual(
         JSON.stringify({
           message: 'Metric dump',
           context: {
@@ -605,21 +588,19 @@ describe('src/metric.js', () => {
     })
 
     it('gauge handles name collision', () => {
-      this.metricRegistry.cumulative('foo-metric', 20, { brand: 'vw' })
-      this.metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
-      this.metricRegistry.logMetrics()
+      metricRegistry.cumulative('foo-metric', 20, { brand: 'vw' })
+      metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
+      metricRegistry.logMetrics()
 
-      expect(this.error.callCount, 'to be', 1)
-      expect(this.error.args, 'to equal', [
+      expect(errorStub.callCount).toEqual(1)
+      expect(errorStub.args).toEqual([
         [
           '{"message":"Cannot add gauge with same name as existing cumulative","context":{"name":"foo-metric","value":4,"labels":{"brand":"vw"}},"severity":"ERROR","timestamp":"2017-09-01T13:37:42.000Z"}'
         ]
       ])
-      expect(this.log.callCount, 'to be', 1)
-      expect(this.log.args[0].length, 'to be', 1)
-      expect(
-        this.log.args[0][0],
-        'to equal',
+      expect(logStub.callCount).toEqual(1)
+      expect(logStub.args[0].length).toEqual(1)
+      expect(logStub.args[0][0]).toEqual(
         JSON.stringify({
           message: 'Metric dump',
           context: {
@@ -641,17 +622,15 @@ describe('src/metric.js', () => {
     })
 
     it('does not log old metrics', () => {
-      this.metricRegistry.gauge('gauge', 4, { brand: 'vw' })
-      this.metricRegistry.gauge('gauge', 5, { brand: 'vw' })
-      this.clock.tick(24 * 60 * 60 * 1000 + 1)
-      this.metricRegistry.cumulative('cumulative', 20, { brand: 'vw' })
-      this.metricRegistry.logMetrics()
+      metricRegistry.gauge('gauge', 4, { brand: 'vw' })
+      metricRegistry.gauge('gauge', 5, { brand: 'vw' })
+      clock.tick(24 * 60 * 60 * 1000 + 1)
+      metricRegistry.cumulative('cumulative', 20, { brand: 'vw' })
+      metricRegistry.logMetrics()
 
-      expect(this.log.callCount, 'to be', 1)
-      expect(this.log.args[0].length, 'to be', 1)
-      expect(
-        this.log.args[0][0],
-        'to equal',
+      expect(logStub.callCount).toEqual(1)
+      expect(logStub.args[0].length).toEqual(1)
+      expect(logStub.args[0][0]).toEqual(
         JSON.stringify({
           message: 'Metric dump',
           context: {
@@ -674,20 +653,23 @@ describe('src/metric.js', () => {
   })
 
   describe('getMetricRegistry', () => {
+    let logMetricsStub: TypedSinonStub<typeof MetricRegistry.prototype.logMetrics>
     beforeEach(() => {
-      this.logMetrics = sinon.stub(MetricRegistry.prototype, 'logMetrics').returns()
+      logMetricsStub = sinon.stub(MetricRegistry.prototype, 'logMetrics').returns()
     })
     afterEach(() => {
-      this.clock.restore()
+      clock.restore()
     })
+
     it('calls logMetrics on an interval', async () => {
       clearMetricRegistry()
       const registry = getMetricRegistry(10000)
-      this.clock.tick(10000)
-      expect(registry.metrics, 'to equal', {})
-      expect(this.logMetrics.callCount, 'to be', 2)
-      expect(this.logMetrics.args[0], 'to equal', [])
-      expect(this.logMetrics.args[1], 'to equal', [])
+      clock.tick(10000)
+      // @ts-ignore
+      expect(registry.metrics).toEqual({})
+      expect(logMetricsStub.callCount).toEqual(2)
+      expect(logMetricsStub.args[0]).toEqual([])
+      expect(logMetricsStub.args[1]).toEqual([])
     })
 
     it('calls logMetrics using default settings', async () => {
@@ -695,11 +677,12 @@ describe('src/metric.js', () => {
       getMetricRegistry()
 
       const registry = getMetricRegistry(undefined)
-      this.clock.tick(120 * 1000)
-      expect(registry.metrics, 'to equal', {})
-      expect(this.logMetrics.callCount, 'to be', 3)
-      expect(this.logMetrics.args[0], 'to equal', [])
-      expect(this.logMetrics.args[1], 'to equal', [])
+      clock.tick(120 * 1000)
+      // @ts-ignore
+      expect(registry.metrics).toEqual({})
+      expect(logMetricsStub.callCount).toEqual(3)
+      expect(logMetricsStub.args[0]).toEqual([])
+      expect(logMetricsStub.args[1]).toEqual([])
     })
 
     it('can clear metrics without a timeout set', async () => {

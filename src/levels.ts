@@ -1,4 +1,4 @@
-const logLevels = {
+export const logLevels = {
   CRITICAL: 50,
   ERROR: 40,
   WARN: 30,
@@ -8,16 +8,16 @@ const logLevels = {
   TRACE: 5
 }
 
-const getLogLevel = () => {
+export function getLogLevel(): number {
   let logLevel = process.env.LOG_LEVEL || ''
   logLevel = logLevel.toUpperCase()
   if (logLevel in logLevels) {
-    return logLevels[logLevel]
+    return logLevels[logLevel as keyof typeof logLevels]
   }
   return logLevels.WARN
 }
 
-const getLogLevelName = logLevel => {
+export function getLogLevelName(logLevel: number): string {
   switch (logLevel) {
     case logLevels.CRITICAL:
       return 'CRITICAL'
@@ -36,10 +36,4 @@ const getLogLevelName = logLevel => {
     default:
       return 'UNKNOWN'
   }
-}
-
-module.exports = {
-  logLevels,
-  getLogLevel,
-  getLogLevelName
 }

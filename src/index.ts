@@ -1,0 +1,8 @@
+export { critical } from './critical'
+export { debug } from './debug'
+export { error } from './error'
+export { info } from './info'
+export { clearMetricRegistry, getMetricRegistry, MetricRegistry } from './metric'
+export { statistic } from './statistic'
+export { trace } from './trace'
+export { warn } from './warn'
