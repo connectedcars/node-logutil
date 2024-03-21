@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`src/json should generate JSON where all exceptions are handled 1`] = `
+Object {
+  "buffer": "Buffer(DEADBEEF)",
+  "date": "Date(2021-01-09T18:11:34.309Z)",
+  "deep": Object {
+    "deep": Object {
+      "deep": Object {
+        "deep": Object {
+          "deep": Object {
+            "deep": Object {
+              "deep": Object {
+                "deep": Object {
+                  "deep": "(MaxDepth:{\\"deep\\":{\\"deep\\":{}}})",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  "emptyArray": Array [],
+  "false": false,
+  "float": 1.1,
+  "infinity": "(Infinity)",
+  "int": 1,
+  "intArray": Array [
+    1,
+    2,
+    3,
+    4,
+  ],
+  "multiLineString": "hello
+hello",
+  "mySelf": "(Circular:StrippedOut)",
+  "nan": "(NaN)",
+  "null": null,
+  "object": Object {
+    "intKey": 1,
+    "stringKey": "string",
+  },
+  "string": "string",
+  "true": true,
+  "undefined": "(undefined)",
+}
+`;
