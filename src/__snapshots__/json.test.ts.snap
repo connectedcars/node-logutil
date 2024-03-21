@@ -32,8 +32,7 @@ Object {
     3,
     4,
   ],
-  "multiLineString": "hello
-hello",
+  "multiLineString": "hello\\\\nhello",
   "mySelf": "(Circular:StrippedOut)",
   "nan": "(NaN)",
   "null": null,

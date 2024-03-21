@@ -49,7 +49,8 @@ describe('src/json', () => {
     expect(output).toMatchSnapshot()
 
     // Try to convert to JSON and make sure nothing is lost
-    const sample2 = JSON.parse(JSON.stringify(output))
+    const json = JSON.stringify(output, null, 2)
+    const sample2 = JSON.parse(json)
     expect(sample2).toEqual(output)
   })
 })

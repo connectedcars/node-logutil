@@ -34,7 +34,7 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], level:
       return jsValue as number
     }
     if (type === 'string') {
-      return (jsValue as string).replace(/\\n/g, '\\n')
+      return (jsValue as string).replace(/\n/g, '\\n')
     }
     if (type === 'object') {
       if (Array.isArray(jsValue)) {
