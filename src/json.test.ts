@@ -20,6 +20,7 @@ describe('src/json', () => {
     multiLineString: 'hello\nhello',
     emptyArray: [],
     buffer: Buffer.from('DEADBEEF', 'hex'),
+    bigInt: 1n,
     deep: {
       deep: {
         deep: {

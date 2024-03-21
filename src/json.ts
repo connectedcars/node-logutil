@@ -19,67 +19,69 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], level:
   }
   if (jsValue === null) {
     return null
-  } else {
-    const type = typeof jsValue
-    if (type === 'boolean') {
-      return jsValue as boolean
+  }
+  const type = typeof jsValue
+  if (type === 'boolean') {
+    return jsValue as boolean
+  }
+  if (type === 'number') {
+    if (isNaN(jsValue as number)) {
+      return '(NaN)'
     }
-    if (type === 'number') {
-      if (isNaN(jsValue as number)) {
-        return '(NaN)'
-      }
-      if (!isFinite(jsValue as number)) {
-        return '(Infinity)'
-      }
-      return jsValue as number
+    if (!isFinite(jsValue as number)) {
+      return '(Infinity)'
     }
-    if (type === 'string') {
-      return (jsValue as string).replace(/\n/g, '\\n')
-    }
-    if (type === 'object') {
-      if (Array.isArray(jsValue)) {
-        seen.push(jsValue)
-        if (jsValue.length === 0) {
-          return jsValue as Json[]
-        }
-        const values: Json[] = []
-        for (const value of jsValue) {
-          if (seen.indexOf(value) > -1) {
-            values.push('(Circular:StrippedOut)')
-          } else {
-            values.push(_objectToJson(value, seen, level + 1))
-          }
-        }
-        return values
-      }
-      if (jsValue instanceof Date) {
-        return `Date(${jsValue.toISOString()})`
-      }
-      if (Buffer.isBuffer(jsValue)) {
-        return `Buffer(${jsValue.toString('hex').toUpperCase()})`
-      }
-      // Object
-      const keys = Object.keys(jsValue as { [key: string]: Json | undefined })
-      if (keys.length === 0) {
-        return jsValue as { [key: string]: Json }
-      }
+    return jsValue as number
+  }
+  if (type === 'bigint') {
+    return `BigInt(${jsValue?.toString()})`
+  }
+  if (type === 'string') {
+    return (jsValue as string).replace(/\n/g, '\\n')
+  }
+  if (type === 'object') {
+    if (Array.isArray(jsValue)) {
       seen.push(jsValue)
-      const obj: { [key: string]: Json } = {}
-      for (const key of keys) {
-        const value = (jsValue as { [key: string]: Json | undefined })[key]
-        if (typeof value === 'undefined') {
-          obj[key] = '(undefined)'
+      if (jsValue.length === 0) {
+        return jsValue as Json[]
+      }
+      const values: Json[] = []
+      for (const value of jsValue) {
+        if (seen.indexOf(value) > -1) {
+          values.push('(Circular:StrippedOut)')
         } else {
-          if (seen.indexOf(value) > -1) {
-            obj[key] = '(Circular:StrippedOut)'
-          } else {
-            obj[key] = _objectToJson(value, seen, level + 1)
-          }
+          values.push(_objectToJson(value, seen, level + 1))
         }
       }
-      return obj
-    } else {
-      throw new Error(`Unknown JavaScript type: ${type}: ${jsValue}`)
+      return values
     }
+    if (jsValue instanceof Date) {
+      return `Date(${jsValue.toISOString()})`
+    }
+    if (Buffer.isBuffer(jsValue)) {
+      return `Buffer(${jsValue.toString('hex').toUpperCase()})`
+    }
+    // Object
+    const keys = Object.keys(jsValue as { [key: string]: Json | undefined })
+    if (keys.length === 0) {
+      return jsValue as { [key: string]: Json }
+    }
+    seen.push(jsValue)
+    const obj: { [key: string]: Json } = {}
+    for (const key of keys) {
+      const value = (jsValue as { [key: string]: Json | undefined })[key]
+      if (typeof value === 'undefined') {
+        obj[key] = '(undefined)'
+      } else {
+        if (seen.indexOf(value) > -1) {
+          obj[key] = '(Circular:StrippedOut)'
+        } else {
+          obj[key] = _objectToJson(value, seen, level + 1)
+        }
+      }
+    }
+    return obj
+  } else {
+    throw new Error(`Unknown JavaScript type: ${type}: ${jsValue}`)
   }
 }
