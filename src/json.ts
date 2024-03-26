@@ -1,5 +1,5 @@
 // https://github.com/microsoft/TypeScript/issues/1897
-export type Json = null | boolean | number | string | Date | { [prop: string]: Json } | Json[]
+export type Json = null | boolean | number | string | { [prop: string]: Json } | Json[]
 export type JavaScriptValue =
   | Json
   | Buffer
@@ -7,6 +7,7 @@ export type JavaScriptValue =
   | undefined
   | JavaScriptValue[]
   | { [prop: string]: JavaScriptValue | undefined }
+  | Error
 
 export function objectToJson(jsValue: JavaScriptValue): Json {
   const seen: JavaScriptValue[] = []
@@ -61,6 +62,17 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], level:
     if (Buffer.isBuffer(jsValue)) {
       return `Buffer(${jsValue.toString('hex').toUpperCase()})`
     }
+    if (jsValue instanceof Error) {
+      const stack = typeof jsValue.stack === 'string' ? parseStack(jsValue.stack, jsValue.constructor.name) : []
+
+      let cause = {}
+      const _cause = jsValue.cause
+      if ('cause' in jsValue && _cause !== undefined && isJavaScriptValue(_cause)) {
+        seen.push(jsValue)
+        cause = { cause: _objectToJson(_cause, seen, level + 1) }
+      }
+      return { type: jsValue.constructor.name, message: jsValue.message, stack, ...cause }
+    }
     // Object
     const keys = Object.keys(jsValue as { [key: string]: Json | undefined })
     if (keys.length === 0) {
@@ -84,4 +96,34 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], level:
   } else {
     throw new Error(`Unknown JavaScript type: ${type}: ${jsValue}`)
   }
+}
+
+// Parse a node stack trace to an array of strings,
+// fallback to the original stack if the format is unknown
+function parseStack(stack: string, className: string, maxDepth = 5): string | string[] {
+  if (!stack.startsWith(`${className}: `)) {
+    return stack
+  }
+  const stackLines = []
+  for (const line of stack.split('\n')) {
+    if (line.startsWith('    at ')) {
+      stackLines.push(line.substring(7))
+    } else if (line.startsWith(`${className}: `)) {
+      // skip
+    } else {
+      return stack
+    }
+  }
+  return stackLines.slice(0, maxDepth)
+}
+
+function isJavaScriptValue(x: unknown): x is JavaScriptValue {
+  if (x === null || x === undefined) {
+    return true
+  }
+  const types = ['boolean', 'number', 'bigint', 'string', 'object']
+  if (types.includes(typeof x)) {
+    return true
+  }
+  return false
 }

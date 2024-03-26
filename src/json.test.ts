@@ -54,4 +54,48 @@ describe('src/json', () => {
     const sample2 = JSON.parse(json)
     expect(sample2).toEqual(output)
   })
+  describe('Error', () => {
+    class HalClientError extends Error {
+      public constructor(message?: string) {
+        super(message)
+        this.name = this.constructor.name
+      }
+    }
+    class ParserError extends HalClientError {}
+
+    it('should handle Error', () => {
+      const output = objectToJson(new Error('test error'))
+      expect(output).toMatchSnapshot()
+    })
+
+    it('should handle custom error', () => {
+      const output = objectToJson(new HalClientError('test error'))
+      expect(output).toMatchSnapshot()
+    })
+
+    it('should handle Error with cause', () => {
+      const output = objectToJson(new Error('test error', { cause: new Error('cause Error') }))
+      expect(output).toMatchSnapshot()
+    })
+
+    it('should handle Error with custom cause', () => {
+      const output = objectToJson(new Error('test error', { cause: new ParserError('cause Error') }))
+      expect(output).toMatchSnapshot()
+    })
+
+    it('should handle Error with complex cause', () => {
+      const output = objectToJson(
+        new Error('test error', { cause: { ...sample, error: new ParserError('cause Error') } })
+      )
+      expect(output).toMatchSnapshot()
+    })
+
+    it('should handle Error with circular cause', () => {
+      const error = new Error('test error')
+      const cause = { cause: error }
+      error['cause'] = cause
+      const output = objectToJson(error)
+      expect(output).toMatchSnapshot()
+    })
+  })
 })

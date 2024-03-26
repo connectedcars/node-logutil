@@ -1,5 +1,186 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`src/json Error should handle Error 1`] = `
+Object {
+  "message": "test error",
+  "stack": Array [
+    "Object.<anonymous> (/Users/ofweb/Code/node-logutil/src/json.test.ts:67:35)",
+    "Promise.then.completed (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:293:28)",
+    "new Promise (<anonymous>)",
+    "callAsyncCircusFn (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:226:10)",
+    "_callCircusTest (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/run.js:248:40)",
+  ],
+  "type": "Error",
+}
+`;
+
+exports[`src/json Error should handle Error with cause 1`] = `
+Object {
+  "cause": Object {
+    "message": "cause Error",
+    "stack": Array [
+      "Object.<anonymous> (/Users/ofweb/Code/node-logutil/src/json.test.ts:77:68)",
+      "Promise.then.completed (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:293:28)",
+      "new Promise (<anonymous>)",
+      "callAsyncCircusFn (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:226:10)",
+      "_callCircusTest (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/run.js:248:40)",
+    ],
+    "type": "Error",
+  },
+  "message": "test error",
+  "stack": Array [
+    "Object.<anonymous> (/Users/ofweb/Code/node-logutil/src/json.test.ts:77:35)",
+    "Promise.then.completed (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:293:28)",
+    "new Promise (<anonymous>)",
+    "callAsyncCircusFn (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:226:10)",
+    "_callCircusTest (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/run.js:248:40)",
+  ],
+  "type": "Error",
+}
+`;
+
+exports[`src/json Error should handle Error with circular cause 1`] = `
+Object {
+  "cause": Object {
+    "cause": "(Circular:StrippedOut)",
+  },
+  "message": "test error",
+  "stack": Array [
+    "Object.<anonymous> (/Users/ofweb/Code/node-logutil/src/json.test.ts:94:21)",
+    "Promise.then.completed (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:293:28)",
+    "new Promise (<anonymous>)",
+    "callAsyncCircusFn (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:226:10)",
+    "_callCircusTest (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/run.js:248:40)",
+  ],
+  "type": "Error",
+}
+`;
+
+exports[`src/json Error should handle Error with complex cause 1`] = `
+Object {
+  "cause": Object {
+    "bigInt": "BigInt(1)",
+    "buffer": "Buffer(DEADBEEF)",
+    "date": "Date(2021-01-09T18:11:34.309Z)",
+    "deep": Object {
+      "deep": Object {
+        "deep": Object {
+          "deep": Object {
+            "deep": Object {
+              "deep": Object {
+                "deep": Object {
+                  "deep": "(MaxDepth:{\\"deep\\":{\\"deep\\":{\\"deep\\":{}}}})",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "emptyArray": Array [],
+    "error": Object {
+      "message": "cause Error",
+      "stack": Array [
+        "Object.<anonymous> (/Users/ofweb/Code/node-logutil/src/json.test.ts:88:62)",
+        "Promise.then.completed (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:293:28)",
+        "new Promise (<anonymous>)",
+        "callAsyncCircusFn (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:226:10)",
+        "_callCircusTest (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/run.js:248:40)",
+      ],
+      "type": "ParserError",
+    },
+    "false": false,
+    "float": 1.1,
+    "infinity": "(Infinity)",
+    "int": 1,
+    "intArray": Array [
+      1,
+      2,
+      3,
+      4,
+    ],
+    "multiLineString": "hello\\\\nhello",
+    "mySelf": Object {
+      "bigInt": "BigInt(1)",
+      "buffer": "Buffer(DEADBEEF)",
+      "date": "Date(2021-01-09T18:11:34.309Z)",
+      "deep": "(Circular:StrippedOut)",
+      "emptyArray": "(Circular:StrippedOut)",
+      "false": false,
+      "float": 1.1,
+      "infinity": "(Infinity)",
+      "int": 1,
+      "intArray": "(Circular:StrippedOut)",
+      "multiLineString": "hello\\\\nhello",
+      "mySelf": "(Circular:StrippedOut)",
+      "nan": "(NaN)",
+      "null": null,
+      "object": "(Circular:StrippedOut)",
+      "string": "string",
+      "true": true,
+      "undefined": "(undefined)",
+    },
+    "nan": "(NaN)",
+    "null": null,
+    "object": Object {
+      "intKey": 1,
+      "stringKey": "string",
+    },
+    "string": "string",
+    "true": true,
+    "undefined": "(undefined)",
+  },
+  "message": "test error",
+  "stack": Array [
+    "Object.<anonymous> (/Users/ofweb/Code/node-logutil/src/json.test.ts:88:9)",
+    "Promise.then.completed (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:293:28)",
+    "new Promise (<anonymous>)",
+    "callAsyncCircusFn (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:226:10)",
+    "_callCircusTest (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/run.js:248:40)",
+  ],
+  "type": "Error",
+}
+`;
+
+exports[`src/json Error should handle Error with custom cause 1`] = `
+Object {
+  "cause": Object {
+    "message": "cause Error",
+    "stack": Array [
+      "Object.<anonymous> (/Users/ofweb/Code/node-logutil/src/json.test.ts:82:68)",
+      "Promise.then.completed (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:293:28)",
+      "new Promise (<anonymous>)",
+      "callAsyncCircusFn (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:226:10)",
+      "_callCircusTest (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/run.js:248:40)",
+    ],
+    "type": "ParserError",
+  },
+  "message": "test error",
+  "stack": Array [
+    "Object.<anonymous> (/Users/ofweb/Code/node-logutil/src/json.test.ts:82:35)",
+    "Promise.then.completed (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:293:28)",
+    "new Promise (<anonymous>)",
+    "callAsyncCircusFn (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:226:10)",
+    "_callCircusTest (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/run.js:248:40)",
+  ],
+  "type": "Error",
+}
+`;
+
+exports[`src/json Error should handle custom error 1`] = `
+Object {
+  "message": "test error",
+  "stack": Array [
+    "Object.<anonymous> (/Users/ofweb/Code/node-logutil/src/json.test.ts:72:35)",
+    "Promise.then.completed (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:293:28)",
+    "new Promise (<anonymous>)",
+    "callAsyncCircusFn (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/utils.js:226:10)",
+    "_callCircusTest (/Users/ofweb/Code/node-logutil/node_modules/jest-circus/build/run.js:248:40)",
+  ],
+  "type": "HalClientError",
+}
+`;
+
 exports[`src/json should generate JSON where all exceptions are handled 1`] = `
 Object {
   "bigInt": "BigInt(1)",
