@@ -11,12 +11,12 @@ export type JavaScriptValue =
 
 export function objectToJson(jsValue: JavaScriptValue): Json {
   const seen: JavaScriptValue[] = []
-  return _objectToJson(jsValue, seen, 1)
+  return _objectToJson(jsValue, seen, 10)
 }
 
-function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], level: number): Json {
-  if (level >= 10) {
-    return `(MaxDepth:${JSON.stringify(_objectToJson(jsValue, seen, Number.MIN_SAFE_INTEGER))})`
+function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], maxDepth: number): Json {
+  if (maxDepth <= 0) {
+    return `(MaxDepth:strippedOut:${typeof jsValue})`
   }
   if (jsValue === null) {
     return null
@@ -51,7 +51,7 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], level:
         if (seen.indexOf(value) > -1) {
           values.push('(Circular:StrippedOut)')
         } else {
-          values.push(_objectToJson(value, seen, level + 1))
+          values.push(_objectToJson(value, seen, maxDepth - 1))
         }
       }
       return values
@@ -69,7 +69,7 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], level:
       const _cause = jsValue.cause
       if ('cause' in jsValue && _cause !== undefined && isJavaScriptValue(_cause)) {
         seen.push(jsValue)
-        cause = { cause: _objectToJson(_cause, seen, level + 1) }
+        cause = { cause: _objectToJson(_cause, seen, maxDepth - 1) }
       }
       return { type: jsValue.constructor.name, message: jsValue.message, stack, ...cause }
     }
@@ -88,7 +88,7 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], level:
         if (seen.indexOf(value) > -1) {
           obj[key] = '(Circular:StrippedOut)'
         } else {
-          obj[key] = _objectToJson(value, seen, level + 1)
+          obj[key] = _objectToJson(value, seen, maxDepth - 1)
         }
       }
     }
