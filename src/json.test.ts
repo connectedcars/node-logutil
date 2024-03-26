@@ -46,7 +46,7 @@ describe('src/json', () => {
   sample.mySelf = sample
 
   it('should generate JSON where all exceptions are handled', () => {
-    const output = objectToJson(sample)
+    const output = objectToJson(sample, { maxObjectSize: 50 })
     expect(output).toMatchSnapshot()
 
     // Try to convert to JSON and make sure nothing is lost
@@ -112,7 +112,8 @@ describe('src/json', () => {
 
     it('should handle Error with complex cause', () => {
       const output = objectToJson(
-        new Error('test error', { cause: { ...sample, error: new ParserError('cause Error') } })
+        new Error('test error', { cause: { ...sample, error: new ParserError('cause Error') } }),
+        { maxObjectSize: 50 }
       ) as unknown as ErrorCauseJson
 
       expect(output.message).toBe('test error')

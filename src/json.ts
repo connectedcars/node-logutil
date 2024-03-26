@@ -9,12 +9,50 @@ export type JavaScriptValue =
   | { [prop: string]: JavaScriptValue | undefined }
   | Error
 
-export function objectToJson(jsValue: JavaScriptValue): Json {
+export function objectToJson(
+  jsValue: JavaScriptValue,
+  options: Partial<ObjectToJsonOptions> & { maxDepth?: number } = {}
+): Json {
   const seen: JavaScriptValue[] = []
-  return _objectToJson(jsValue, seen, 10)
+  const maxStringLength =
+    options.maxStringLength !== undefined
+      ? options.maxStringLength
+      : process.env.JSON_MAX_STRING_LENGTH !== undefined
+      ? parseInt(process.env.JSON_MAX_STRING_LENGTH)
+      : 100
+  const maxArrayLength =
+    options.maxArrayLength !== undefined
+      ? options.maxArrayLength
+      : process.env.JSON_MAX_ARRAY_LENGTH !== undefined
+      ? parseInt(process.env.JSON_MAX_ARRAY_LENGTH)
+      : 10
+  const maxObjectSize =
+    options.maxObjectSize !== undefined
+      ? options.maxObjectSize
+      : process.env.JSON_MAX_OBJECT_SIZE !== undefined
+      ? parseInt(process.env.JSON_MAX_OBJECT_SIZE)
+      : 10
+  const maxDepth =
+    options.maxDepth !== undefined
+      ? options.maxDepth
+      : process.env.JSON_MAX_DEPTH !== undefined
+      ? parseInt(process.env.JSON_MAX_DEPTH)
+      : 10
+  return _objectToJson(jsValue, seen, maxDepth, { maxStringLength, maxArrayLength, maxObjectSize })
 }
 
-function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], maxDepth: number): Json {
+interface ObjectToJsonOptions {
+  maxStringLength: number
+  maxArrayLength: number
+  maxObjectSize: number
+}
+
+function _objectToJson(
+  jsValue: JavaScriptValue,
+  seen: JavaScriptValue[],
+  maxDepth: number,
+  options: ObjectToJsonOptions
+): Json {
   if (maxDepth <= 0) {
     return `(MaxDepth:strippedOut:${typeof jsValue})`
   }
@@ -38,7 +76,10 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], maxDep
     return `BigInt(${jsValue?.toString()})`
   }
   if (type === 'string') {
-    return (jsValue as string).replace(/\n/g, '\\n')
+    return (
+      (jsValue as string).replace(/\n/g, '\\n').substring(0, options.maxStringLength) +
+      ((jsValue as string).length > options.maxStringLength ? '...' : '')
+    )
   }
   if (type === 'object') {
     if (Array.isArray(jsValue)) {
@@ -51,7 +92,11 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], maxDep
         if (seen.indexOf(value) > -1) {
           values.push('(Circular:StrippedOut)')
         } else {
-          values.push(_objectToJson(value, seen, maxDepth - 1))
+          if (values.length > options.maxArrayLength) {
+            values.push('truncated...')
+            break
+          }
+          values.push(_objectToJson(value, seen, maxDepth - 1, options))
         }
       }
       return values
@@ -72,7 +117,7 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], maxDep
         if (seen.indexOf(_cause) > -1) {
           cause = { cause: '(Circular:StrippedOut)' }
         } else {
-          cause = { cause: _objectToJson(_cause, seen, maxDepth - 1) }
+          cause = { cause: _objectToJson(_cause, seen, maxDepth - 1, options) }
         }
       }
       return { type: jsValue.constructor.name, message: jsValue.message, stack, ...cause }
@@ -84,13 +129,16 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], maxDep
     }
     seen.push(jsValue)
     const obj: { [key: string]: Json } = {}
-    for (const key of keys) {
+    for (const key of keys.slice(0, options.maxObjectSize)) {
       const value = (jsValue as { [key: string]: Json | undefined })[key]
       if (typeof value === 'undefined') {
         obj[key] = '(undefined)'
       } else {
-        obj[key] = _objectToJson(value, seen, maxDepth - 1)
+        obj[key] = _objectToJson(value, seen, maxDepth - 1, options)
       }
+    }
+    if (keys.length > options.maxObjectSize) {
+      obj['truncated...'] = true
     }
     return obj
   } else {
