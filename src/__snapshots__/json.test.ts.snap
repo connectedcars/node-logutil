@@ -36,7 +36,314 @@ Object {
     4,
   ],
   "multiLineString": "hello\\\\nhello",
-  "mySelf": "(Circular:StrippedOut)",
+  "mySelf": Object {
+    "bigInt": "BigInt(1)",
+    "buffer": "Buffer(DEADBEEF)",
+    "date": "Date(2021-01-09T18:11:34.309Z)",
+    "deep": Object {
+      "deep": Object {
+        "deep": Object {
+          "deep": Object {
+            "deep": Object {
+              "deep": Object {
+                "deep": Object {
+                  "deep": Object {
+                    "deep": "(MaxDepth:strippedOut:object)",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "emptyArray": Array [],
+    "false": false,
+    "float": 1.1,
+    "infinity": "(Infinity)",
+    "int": 1,
+    "intArray": Array [
+      1,
+      2,
+      3,
+      4,
+    ],
+    "multiLineString": "hello\\\\nhello",
+    "mySelf": Object {
+      "bigInt": "BigInt(1)",
+      "buffer": "Buffer(DEADBEEF)",
+      "date": "Date(2021-01-09T18:11:34.309Z)",
+      "deep": Object {
+        "deep": Object {
+          "deep": Object {
+            "deep": Object {
+              "deep": Object {
+                "deep": Object {
+                  "deep": Object {
+                    "deep": "(MaxDepth:strippedOut:object)",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      "emptyArray": Array [],
+      "false": false,
+      "float": 1.1,
+      "infinity": "(Infinity)",
+      "int": 1,
+      "intArray": Array [
+        1,
+        2,
+        3,
+        4,
+      ],
+      "multiLineString": "hello\\\\nhello",
+      "mySelf": Object {
+        "bigInt": "BigInt(1)",
+        "buffer": "Buffer(DEADBEEF)",
+        "date": "Date(2021-01-09T18:11:34.309Z)",
+        "deep": Object {
+          "deep": Object {
+            "deep": Object {
+              "deep": Object {
+                "deep": Object {
+                  "deep": Object {
+                    "deep": "(MaxDepth:strippedOut:object)",
+                  },
+                },
+              },
+            },
+          },
+        },
+        "emptyArray": Array [],
+        "false": false,
+        "float": 1.1,
+        "infinity": "(Infinity)",
+        "int": 1,
+        "intArray": Array [
+          1,
+          2,
+          3,
+          4,
+        ],
+        "multiLineString": "hello\\\\nhello",
+        "mySelf": Object {
+          "bigInt": "BigInt(1)",
+          "buffer": "Buffer(DEADBEEF)",
+          "date": "Date(2021-01-09T18:11:34.309Z)",
+          "deep": Object {
+            "deep": Object {
+              "deep": Object {
+                "deep": Object {
+                  "deep": Object {
+                    "deep": "(MaxDepth:strippedOut:object)",
+                  },
+                },
+              },
+            },
+          },
+          "emptyArray": Array [],
+          "false": false,
+          "float": 1.1,
+          "infinity": "(Infinity)",
+          "int": 1,
+          "intArray": Array [
+            1,
+            2,
+            3,
+            4,
+          ],
+          "multiLineString": "hello\\\\nhello",
+          "mySelf": Object {
+            "bigInt": "BigInt(1)",
+            "buffer": "Buffer(DEADBEEF)",
+            "date": "Date(2021-01-09T18:11:34.309Z)",
+            "deep": Object {
+              "deep": Object {
+                "deep": Object {
+                  "deep": Object {
+                    "deep": "(MaxDepth:strippedOut:object)",
+                  },
+                },
+              },
+            },
+            "emptyArray": Array [],
+            "false": false,
+            "float": 1.1,
+            "infinity": "(Infinity)",
+            "int": 1,
+            "intArray": Array [
+              1,
+              2,
+              3,
+              4,
+            ],
+            "multiLineString": "hello\\\\nhello",
+            "mySelf": Object {
+              "bigInt": "BigInt(1)",
+              "buffer": "Buffer(DEADBEEF)",
+              "date": "Date(2021-01-09T18:11:34.309Z)",
+              "deep": Object {
+                "deep": Object {
+                  "deep": Object {
+                    "deep": "(MaxDepth:strippedOut:object)",
+                  },
+                },
+              },
+              "emptyArray": Array [],
+              "false": false,
+              "float": 1.1,
+              "infinity": "(Infinity)",
+              "int": 1,
+              "intArray": Array [
+                1,
+                2,
+                3,
+                4,
+              ],
+              "multiLineString": "hello\\\\nhello",
+              "mySelf": Object {
+                "bigInt": "BigInt(1)",
+                "buffer": "Buffer(DEADBEEF)",
+                "date": "Date(2021-01-09T18:11:34.309Z)",
+                "deep": Object {
+                  "deep": Object {
+                    "deep": "(MaxDepth:strippedOut:object)",
+                  },
+                },
+                "emptyArray": Array [],
+                "false": false,
+                "float": 1.1,
+                "infinity": "(Infinity)",
+                "int": 1,
+                "intArray": Array [
+                  1,
+                  2,
+                  3,
+                  4,
+                ],
+                "multiLineString": "hello\\\\nhello",
+                "mySelf": Object {
+                  "bigInt": "BigInt(1)",
+                  "buffer": "Buffer(DEADBEEF)",
+                  "date": "Date(2021-01-09T18:11:34.309Z)",
+                  "deep": Object {
+                    "deep": "(MaxDepth:strippedOut:object)",
+                  },
+                  "emptyArray": Array [],
+                  "false": false,
+                  "float": 1.1,
+                  "infinity": "(Infinity)",
+                  "int": 1,
+                  "intArray": Array [
+                    "(MaxDepth:strippedOut:number)",
+                    "(MaxDepth:strippedOut:number)",
+                    "(MaxDepth:strippedOut:number)",
+                    "(MaxDepth:strippedOut:number)",
+                  ],
+                  "multiLineString": "hello\\\\nhello",
+                  "mySelf": Object {
+                    "bigInt": "(MaxDepth:strippedOut:bigint)",
+                    "buffer": "(MaxDepth:strippedOut:object)",
+                    "date": "(MaxDepth:strippedOut:object)",
+                    "deep": "(MaxDepth:strippedOut:object)",
+                    "emptyArray": "(MaxDepth:strippedOut:object)",
+                    "false": "(MaxDepth:strippedOut:boolean)",
+                    "float": "(MaxDepth:strippedOut:number)",
+                    "infinity": "(MaxDepth:strippedOut:number)",
+                    "int": "(MaxDepth:strippedOut:number)",
+                    "intArray": "(MaxDepth:strippedOut:object)",
+                    "multiLineString": "(MaxDepth:strippedOut:string)",
+                    "mySelf": "(MaxDepth:strippedOut:object)",
+                    "nan": "(MaxDepth:strippedOut:number)",
+                    "null": "(MaxDepth:strippedOut:object)",
+                    "object": "(MaxDepth:strippedOut:object)",
+                    "string": "(MaxDepth:strippedOut:string)",
+                    "true": "(MaxDepth:strippedOut:boolean)",
+                    "undefined": "(undefined)",
+                  },
+                  "nan": "(NaN)",
+                  "null": null,
+                  "object": Object {
+                    "intKey": "(MaxDepth:strippedOut:number)",
+                    "stringKey": "(MaxDepth:strippedOut:string)",
+                  },
+                  "string": "string",
+                  "true": true,
+                  "undefined": "(undefined)",
+                },
+                "nan": "(NaN)",
+                "null": null,
+                "object": Object {
+                  "intKey": 1,
+                  "stringKey": "string",
+                },
+                "string": "string",
+                "true": true,
+                "undefined": "(undefined)",
+              },
+              "nan": "(NaN)",
+              "null": null,
+              "object": Object {
+                "intKey": 1,
+                "stringKey": "string",
+              },
+              "string": "string",
+              "true": true,
+              "undefined": "(undefined)",
+            },
+            "nan": "(NaN)",
+            "null": null,
+            "object": Object {
+              "intKey": 1,
+              "stringKey": "string",
+            },
+            "string": "string",
+            "true": true,
+            "undefined": "(undefined)",
+          },
+          "nan": "(NaN)",
+          "null": null,
+          "object": Object {
+            "intKey": 1,
+            "stringKey": "string",
+          },
+          "string": "string",
+          "true": true,
+          "undefined": "(undefined)",
+        },
+        "nan": "(NaN)",
+        "null": null,
+        "object": Object {
+          "intKey": 1,
+          "stringKey": "string",
+        },
+        "string": "string",
+        "true": true,
+        "undefined": "(undefined)",
+      },
+      "nan": "(NaN)",
+      "null": null,
+      "object": Object {
+        "intKey": 1,
+        "stringKey": "string",
+      },
+      "string": "string",
+      "true": true,
+      "undefined": "(undefined)",
+    },
+    "nan": "(NaN)",
+    "null": null,
+    "object": Object {
+      "intKey": 1,
+      "stringKey": "string",
+    },
+    "string": "string",
+    "true": true,
+    "undefined": "(undefined)",
+  },
   "nan": "(NaN)",
   "null": null,
   "object": Object {

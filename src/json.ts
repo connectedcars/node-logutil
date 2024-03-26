@@ -89,11 +89,7 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], maxDep
       if (typeof value === 'undefined') {
         obj[key] = '(undefined)'
       } else {
-        if (seen.indexOf(value) > -1) {
-          obj[key] = '(Circular:StrippedOut)'
-        } else {
-          obj[key] = _objectToJson(value, seen, maxDepth - 1)
-        }
+        obj[key] = _objectToJson(value, seen, maxDepth - 1)
       }
     }
     return obj
