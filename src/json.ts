@@ -69,7 +69,11 @@ function _objectToJson(jsValue: JavaScriptValue, seen: JavaScriptValue[], maxDep
       const _cause = jsValue.cause
       if ('cause' in jsValue && _cause !== undefined && isJavaScriptValue(_cause)) {
         seen.push(jsValue)
-        cause = { cause: _objectToJson(_cause, seen, maxDepth - 1) }
+        if (seen.indexOf(_cause) > -1) {
+          cause = { cause: '(Circular:StrippedOut)' }
+        } else {
+          cause = { cause: _objectToJson(_cause, seen, maxDepth - 1) }
+        }
       }
       return { type: jsValue.constructor.name, message: jsValue.message, stack, ...cause }
     }
