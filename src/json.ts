@@ -134,7 +134,11 @@ function _objectToJson(
       if (typeof value === 'undefined') {
         obj[key] = '(undefined)'
       } else {
-        obj[key] = _objectToJson(value, seen, maxDepth - 1, options)
+        if (seen.indexOf(value) > -1) {
+          obj[key] = '(Circular:StrippedOut)'
+        } else {
+          obj[key] = _objectToJson(value, seen, maxDepth - 1, options)
+        }
       }
     }
     if (keys.length > options.maxObjectSize) {
