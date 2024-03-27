@@ -2,6 +2,7 @@
 export type Json = null | boolean | number | string | { [prop: string]: Json } | Json[]
 export type JavaScriptValue =
   | Json
+  | bigint
   | Buffer
   | Date
   | undefined
@@ -59,106 +60,111 @@ function _objectToJson(
   if (jsValue === null) {
     return null
   }
-  const type = typeof jsValue
-  if (type === 'boolean') {
-    return jsValue as boolean
+  if (jsValue === undefined) {
+    return '(undefined)'
   }
-  if (type === 'number') {
-    if (isNaN(jsValue as number)) {
-      return '(NaN)'
-    }
-    if (!isFinite(jsValue as number)) {
-      return '(Infinity)'
-    }
-    return jsValue as number
-  }
-  if (type === 'bigint') {
-    return `BigInt(${jsValue?.toString()})`
-  }
-  if (type === 'string') {
-    return (
-      (jsValue as string).replace(/\n/g, '\\n').substring(0, options.maxStringLength) +
-      ((jsValue as string).length > options.maxStringLength ? '...' : '')
-    )
-  }
-  if (type === 'object') {
-    if (Array.isArray(jsValue)) {
-      seen.push(jsValue)
-      if (jsValue.length === 0) {
-        return jsValue as Json[]
-      }
-      const values: Json[] = []
-      for (const value of jsValue) {
-        if (seen.indexOf(value) > -1) {
-          values.push('(Circular:StrippedOut)')
-        } else {
-          if (values.length > options.maxArrayLength) {
-            values.push('truncated...')
-            break
-          }
-          values.push(_objectToJson(value, seen, maxDepth - 1, options))
-        }
-      }
-      return values
-    }
-    if (jsValue instanceof Date) {
-      return `Date(${jsValue.toISOString()})`
-    }
-    if (Buffer.isBuffer(jsValue)) {
-      return `Buffer(${jsValue.toString('hex').toUpperCase()})`
-    }
-    if (jsValue instanceof Error) {
-      const stack = typeof jsValue.stack === 'string' ? parseStack(jsValue.stack, jsValue.constructor.name) : []
 
-      let cause = {}
-      const _cause = jsValue.cause
-      if ('cause' in jsValue && _cause !== undefined && isJavaScriptValue(_cause)) {
-        seen.push(jsValue)
-        if (seen.indexOf(_cause) > -1) {
-          cause = { cause: '(Circular:StrippedOut)' }
-        } else {
-          cause = { cause: _objectToJson(_cause, seen, maxDepth - 1, options) }
-        }
+  switch (typeof jsValue) {
+    case 'boolean':
+      return jsValue
+    case 'number': {
+      if (isNaN(jsValue)) {
+        return '(NaN)'
       }
-      let context = {}
-      if ('context' in jsValue) {
-        const _context = jsValue.context
-        if (_context !== undefined && isJavaScriptValue(_context)) {
-          if (seen.indexOf(_context) > -1) {
-            context = { context: '(Circular:StrippedOut)' }
+      if (!isFinite(jsValue)) {
+        return '(Infinity)'
+      }
+      return jsValue
+    }
+    case 'bigint':
+      return `BigInt(${jsValue?.toString()})`
+    case 'string':
+      return (
+        jsValue.replace(/\n/g, '\\n').substring(0, options.maxStringLength) +
+        (jsValue.length > options.maxStringLength ? '...' : '')
+      )
+    case 'object': {
+      if (Array.isArray(jsValue)) {
+        seen.push(jsValue)
+        if (jsValue.length === 0) {
+          return jsValue as Json[]
+        }
+        const values: Json[] = []
+        for (const value of jsValue) {
+          if (seen.indexOf(value) > -1) {
+            values.push('(Circular:StrippedOut)')
           } else {
-            context = { context: _objectToJson(_context, seen, maxDepth - 1, options) }
+            if (values.length > options.maxArrayLength) {
+              values.push('truncated...')
+              break
+            }
+            values.push(_objectToJson(value, seen, maxDepth - 1, options))
+          }
+        }
+        return values
+      }
+      if (jsValue instanceof Date) {
+        return `Date(${jsValue.toISOString()})`
+      }
+      if (Buffer.isBuffer(jsValue)) {
+        return `Buffer(${jsValue.toString('hex').toUpperCase()})`
+      }
+      if (jsValue instanceof Error) {
+        const stack = typeof jsValue.stack === 'string' ? parseStack(jsValue.stack, jsValue.constructor.name) : []
+
+        let cause = {}
+        const _cause = jsValue.cause
+        if ('cause' in jsValue && _cause !== undefined && isJavaScriptValue(_cause)) {
+          seen.push(jsValue)
+          if (seen.indexOf(_cause) > -1) {
+            cause = { cause: '(Circular:StrippedOut)' }
+          } else {
+            cause = { cause: _objectToJson(_cause, seen, maxDepth - 1, options) }
+          }
+        }
+        let context = {}
+        if ('context' in jsValue) {
+          const _context = jsValue.context
+          if (_context !== undefined && isJavaScriptValue(_context)) {
+            if (seen.indexOf(_context) > -1) {
+              context = { context: '(Circular:StrippedOut)' }
+            } else {
+              context = { context: _objectToJson(_context, seen, maxDepth - 1, options) }
+            }
+          }
+        }
+        return { type: jsValue.constructor.name, message: jsValue.message, stack, ...cause, ...context }
+      }
+      // Object
+      const keys = Object.keys(jsValue)
+      if (keys.length === 0) {
+        return jsValue as { [key: string]: Json }
+      }
+      seen.push(jsValue)
+      const obj: { [key: string]: Json } = {}
+      for (const key of keys.slice(0, options.maxObjectSize)) {
+        const value = jsValue[key]
+        if (typeof value === 'undefined') {
+          obj[key] = '(undefined)'
+        } else {
+          if (seen.indexOf(value) > -1) {
+            obj[key] = '(Circular:StrippedOut)'
+          } else {
+            obj[key] = _objectToJson(value, seen, maxDepth - 1, options)
           }
         }
       }
-      return { type: jsValue.constructor.name, message: jsValue.message, stack, ...cause, ...context }
-    }
-    // Object
-    const keys = Object.keys(jsValue as { [key: string]: Json | undefined })
-    if (keys.length === 0) {
-      return jsValue as { [key: string]: Json }
-    }
-    seen.push(jsValue)
-    const obj: { [key: string]: Json } = {}
-    for (const key of keys.slice(0, options.maxObjectSize)) {
-      const value = (jsValue as { [key: string]: Json | undefined })[key]
-      if (typeof value === 'undefined') {
-        obj[key] = '(undefined)'
-      } else {
-        if (seen.indexOf(value) > -1) {
-          obj[key] = '(Circular:StrippedOut)'
-        } else {
-          obj[key] = _objectToJson(value, seen, maxDepth - 1, options)
-        }
+      if (keys.length > options.maxObjectSize) {
+        obj['truncated...'] = true
       }
+      return obj
     }
-    if (keys.length > options.maxObjectSize) {
-      obj['truncated...'] = true
-    }
-    return obj
-  } else {
-    throw new Error(`Unknown JavaScript type: ${type}: ${jsValue}`)
   }
+  return assertUnreachable(jsValue, 'Unknown JavaScript type')
+}
+
+function assertUnreachable(x: never, message: string): never {
+  throw new Error(`${message}: ${JSON.stringify(x)} type: ${typeof x}`)
 }
 
 // Parse a node stack trace to an array of strings,
