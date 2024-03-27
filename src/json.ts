@@ -120,7 +120,18 @@ function _objectToJson(
           cause = { cause: _objectToJson(_cause, seen, maxDepth - 1, options) }
         }
       }
-      return { type: jsValue.constructor.name, message: jsValue.message, stack, ...cause }
+      let context = {}
+      if ('context' in jsValue) {
+        const _context = jsValue.context
+        if (_context !== undefined && isJavaScriptValue(_context)) {
+          if (seen.indexOf(_context) > -1) {
+            context = { context: '(Circular:StrippedOut)' }
+          } else {
+            context = { context: _objectToJson(_context, seen, maxDepth - 1, options) }
+          }
+        }
+      }
+      return { type: jsValue.constructor.name, message: jsValue.message, stack, ...cause, ...context }
     }
     // Object
     const keys = Object.keys(jsValue as { [key: string]: Json | undefined })

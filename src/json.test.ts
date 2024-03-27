@@ -139,6 +139,26 @@ describe('src/json', () => {
       expect(output.cause).toBeDefined()
       expect(output.cause).toBe('(Circular:StrippedOut)')
     })
+
+    it('handles Error with context', () => {
+      const output = objectToJson(
+        new ErrorWithContext('test error', {
+          cause: new ErrorWithContext('cause Error', { context: { causeContext: 'test' } }),
+          context: { foo: 'bar' }
+        })
+      ) as unknown as ContextErrorJson
+
+      expect(output.message).toBe('test error')
+      expect(output.type).toBe('ErrorWithContext')
+      expect(Array.isArray(output.stack)).toBe(true)
+      expect(output.stack.length).toBeGreaterThan(0)
+      expect(output.context).toEqual({ foo: 'bar' })
+      expect(output.cause).toBeDefined()
+      expect(output.cause?.message).toBe('cause Error')
+      expect(output.cause?.type).toBe('ErrorWithContext')
+      expect(Array.isArray(output.cause?.stack)).toBe(true)
+      expect(output.cause?.stack.length).toBeGreaterThan(0)
+    })
   })
 })
 
@@ -154,4 +174,25 @@ interface ErrorCauseJson {
   message: string
   stack: string[]
   cause?: { error: ErrorJson }
+}
+interface ContextErrorJson {
+  type: string
+  message: string
+  stack: string[]
+  context: { [key: string]: unknown }
+  cause?: ContextErrorJson
+}
+
+interface ErrorContext {
+  context?: Record<string, unknown>
+}
+
+export class ErrorWithContext extends Error {
+  public context?: Record<string, unknown>
+
+  public constructor(message: string, options?: ErrorOptions & ErrorContext) {
+    super(message, options)
+    this.name = this.constructor.name
+    this.context = options?.context
+  }
 }
