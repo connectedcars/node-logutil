@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { objectToJson } from './json'
 
 describe('src/json', () => {
@@ -66,7 +67,7 @@ describe('src/json', () => {
     it('should handle Error', () => {
       const output = objectToJson(new Error('test error')) as unknown as ErrorJson
       expect(output.message).toBe('test error')
-      expect(output.type).toBe('Error')
+      expect(output.__errorType).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeUndefined()
@@ -75,7 +76,7 @@ describe('src/json', () => {
     it('should handle custom error', () => {
       const output = objectToJson(new HalClientError('test error')) as unknown as ErrorJson
       expect(output.message).toBe('test error')
-      expect(output.type).toBe('HalClientError')
+      expect(output.__errorType).toBe('HalClientError')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeUndefined()
@@ -84,12 +85,12 @@ describe('src/json', () => {
     it('should handle Error with cause', () => {
       const output = objectToJson(new Error('test error', { cause: new Error('cause Error') })) as unknown as ErrorJson
       expect(output.message).toBe('test error')
-      expect(output.type).toBe('Error')
+      expect(output.__errorType).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeDefined()
       expect(output.cause?.message).toBe('cause Error')
-      expect(output.cause?.type).toBe('Error')
+      expect(output.cause?.__errorType).toBe('Error')
       expect(Array.isArray(output.cause?.stack)).toBe(true)
       expect(output.cause?.stack.length).toBeGreaterThan(0)
     })
@@ -100,12 +101,12 @@ describe('src/json', () => {
       ) as unknown as ErrorJson
 
       expect(output.message).toBe('test error')
-      expect(output.type).toBe('Error')
+      expect(output.__errorType).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeDefined()
       expect(output.cause?.message).toBe('cause Error')
-      expect(output.cause?.type).toBe('ParserError')
+      expect(output.cause?.__errorType).toBe('ParserError')
       expect(Array.isArray(output.cause?.stack)).toBe(true)
       expect(output.cause?.stack.length).toBeGreaterThan(0)
     })
@@ -117,12 +118,12 @@ describe('src/json', () => {
       ) as unknown as ErrorCauseJson
 
       expect(output.message).toBe('test error')
-      expect(output.type).toBe('Error')
+      expect(output.__errorType).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeDefined()
       expect(output.cause?.error?.message).toBe('cause Error')
-      expect(output.cause?.error?.type).toBe('ParserError')
+      expect(output.cause?.error?.__errorType).toBe('ParserError')
       expect(Array.isArray(output.cause?.error?.stack)).toBe(true)
       expect(output.cause?.error?.stack.length).toBeGreaterThan(0)
     })
@@ -133,7 +134,7 @@ describe('src/json', () => {
       const output = objectToJson(error) as unknown as ErrorJson
 
       expect(output.message).toBe('test error')
-      expect(output.type).toBe('Error')
+      expect(output.__errorType).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeDefined()
@@ -149,34 +150,77 @@ describe('src/json', () => {
       ) as unknown as ContextErrorJson
 
       expect(output.message).toBe('test error')
-      expect(output.type).toBe('ErrorWithContext')
+      expect(output.__errorType).toBe('ErrorWithContext')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.context).toEqual({ foo: 'bar' })
       expect(output.cause).toBeDefined()
       expect(output.cause?.message).toBe('cause Error')
-      expect(output.cause?.type).toBe('ErrorWithContext')
+      expect(output.cause?.__errorType).toBe('ErrorWithContext')
       expect(Array.isArray(output.cause?.stack)).toBe(true)
       expect(output.cause?.stack.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('weird cases', () => {
+    it('should handle Map', () => {
+      const map = new Map()
+      map.set('foo', 'bar')
+      map.set({ k: 'v' }, () => console.log('hello'))
+      map.set(new RegExp('test'), undefined)
+
+      const output = objectToJson(map)
+      expect(output).toEqual({ foo: 'bar', '{"k":"v"}': "() => console.log('hello')", 'RegExp(test)': '(undefined)' })
+    })
+
+    it('should handle Set', () => {
+      const set = new Set()
+      set.add('foo')
+      set.add(() => console.log('hello'))
+      set.add(new RegExp(/\w[test]+/))
+      const output = objectToJson(set)
+      expect(output).toEqual(['foo', "() => console.log('hello')", 'RegExp(\\w[test]+)'])
+    })
+
+    it('should handle weakmap', () => {
+      const weakMap = new WeakMap()
+      const key = {}
+      weakMap.set(key, 'value')
+      const output = objectToJson(weakMap)
+      expect(output).toEqual('(WeakCollection:strippedOut)')
+    })
+
+    it('should handle weakset', () => {
+      const weakSet = new WeakSet()
+      const key = {}
+      weakSet.add(key)
+      const output = objectToJson(weakSet)
+      expect(output).toEqual('(WeakCollection:strippedOut)')
+    })
+
+    it('should handle very long string', () => {
+      const longString = 'a'.repeat(1000)
+      const output = objectToJson(longString)
+      expect(output).toBe('a'.repeat(100) + '...(truncated)')
     })
   })
 })
 
 interface ErrorJson {
-  type: string
+  __errorType: string
   message: string
   stack: string[]
   cause?: ErrorJson
 }
 
 interface ErrorCauseJson {
-  type: string
+  __errorType: string
   message: string
   stack: string[]
   cause?: { error: ErrorJson }
 }
 interface ContextErrorJson {
-  type: string
+  __errorType: string
   message: string
   stack: string[]
   context: { [key: string]: unknown }

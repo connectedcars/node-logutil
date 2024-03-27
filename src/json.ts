@@ -9,6 +9,13 @@ export type JavaScriptValue =
   | JavaScriptValue[]
   | { [prop: string]: JavaScriptValue | undefined }
   | Error
+  | Map<JavaScriptValue, JavaScriptValue>
+  | Set<JavaScriptValue>
+  | WeakMap<object, JavaScriptValue>
+  | WeakSet<object>
+  | RegExp
+  | { new (...args: JavaScriptValue[]): JavaScriptValue }
+  | ((...args: JavaScriptValue[]) => JavaScriptValue)
 
 export function objectToJson(
   jsValue: JavaScriptValue,
@@ -81,7 +88,7 @@ function _objectToJson(
     case 'string':
       return (
         jsValue.replace(/\n/g, '\\n').substring(0, options.maxStringLength) +
-        (jsValue.length > options.maxStringLength ? '...' : '')
+        (jsValue.length > options.maxStringLength ? '...(truncated)' : '')
       )
     case 'object': {
       if (Array.isArray(jsValue)) {
@@ -102,14 +109,11 @@ function _objectToJson(
           }
         }
         return values
-      }
-      if (jsValue instanceof Date) {
+      } else if (jsValue instanceof Date) {
         return `Date(${jsValue.toISOString()})`
-      }
-      if (Buffer.isBuffer(jsValue)) {
+      } else if (Buffer.isBuffer(jsValue)) {
         return `Buffer(${jsValue.toString('hex').toUpperCase()})`
-      }
-      if (jsValue instanceof Error) {
+      } else if (jsValue instanceof Error) {
         const stack = typeof jsValue.stack === 'string' ? parseStack(jsValue.stack, jsValue.constructor.name) : []
 
         let cause = {}
@@ -133,32 +137,54 @@ function _objectToJson(
             }
           }
         }
-        return { type: jsValue.constructor.name, message: jsValue.message, stack, ...cause, ...context }
-      }
-      // Object
-      const keys = Object.keys(jsValue)
-      if (keys.length === 0) {
-        return jsValue as { [key: string]: Json }
-      }
-      seen.push(jsValue)
-      const obj: { [key: string]: Json } = {}
-      for (const key of keys.slice(0, options.maxObjectSize)) {
-        const value = jsValue[key]
-        if (typeof value === 'undefined') {
-          obj[key] = '(undefined)'
-        } else {
-          if (seen.indexOf(value) > -1) {
-            obj[key] = '(Circular:StrippedOut)'
+        return { __errorType: jsValue.constructor.name, message: jsValue.message, stack, ...cause, ...context }
+      } else if (jsValue instanceof Map) {
+        const obj: { [key: string]: Json } = {}
+        seen.push(jsValue)
+        for (const [key, value] of jsValue.entries()) {
+          const jsonKey = _objectToJson(key, seen, maxDepth - 1, options)
+          const stringKey = typeof jsonKey === 'string' ? jsonKey : JSON.stringify(jsonKey)
+          obj[stringKey] = _objectToJson(value, seen, maxDepth - 1, options)
+        }
+        return obj
+      } else if (jsValue instanceof Set) {
+        const arr: Json[] = []
+        seen.push(jsValue)
+        for (const value of jsValue.values()) {
+          arr.push(_objectToJson(value, seen, maxDepth - 1, options))
+        }
+        return arr
+      } else if (jsValue instanceof WeakMap || jsValue instanceof WeakSet) {
+        return '(WeakCollection:strippedOut)'
+      } else if (jsValue instanceof RegExp) {
+        return `RegExp(${jsValue.source})`
+      } else {
+        const keys = Object.keys(jsValue)
+        if (keys.length === 0) {
+          return jsValue as { [key: string]: Json }
+        }
+        seen.push(jsValue)
+        const obj: { [key: string]: Json } = {}
+        for (const key of keys.slice(0, options.maxObjectSize)) {
+          const value = jsValue[key]
+          if (typeof value === 'undefined') {
+            obj[key] = '(undefined)'
           } else {
-            obj[key] = _objectToJson(value, seen, maxDepth - 1, options)
+            if (seen.indexOf(value) > -1) {
+              obj[key] = '(Circular:StrippedOut)'
+            } else {
+              obj[key] = _objectToJson(value, seen, maxDepth - 1, options)
+            }
           }
         }
+        if (keys.length > options.maxObjectSize) {
+          obj['truncated...'] = true
+        }
+        return obj
       }
-      if (keys.length > options.maxObjectSize) {
-        obj['truncated...'] = true
-      }
-      return obj
     }
+    case 'function':
+      return jsValue.toString()
   }
   return assertUnreachable(jsValue, 'Unknown JavaScript type')
 }
