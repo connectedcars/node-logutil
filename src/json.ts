@@ -91,17 +91,17 @@ function _objectToJson(
         (jsValue.length > options.maxStringLength ? '...(truncated)' : '')
       )
     case 'object': {
+      seen.push(jsValue)
       if (Array.isArray(jsValue)) {
-        seen.push(jsValue)
         if (jsValue.length === 0) {
           return jsValue as Json[]
         }
         const values: Json[] = []
         for (const value of jsValue) {
-          if (seen.indexOf(value) > -1) {
+          if (seen.includes(value)) {
             values.push('(Circular:StrippedOut)')
           } else {
-            if (values.length > options.maxArrayLength) {
+            if (values.length >= options.maxArrayLength) {
               values.push('truncated...')
               break
             }
@@ -120,7 +120,7 @@ function _objectToJson(
         const _cause = jsValue.cause
         if ('cause' in jsValue && _cause !== undefined && isJavaScriptValue(_cause)) {
           seen.push(jsValue)
-          if (seen.indexOf(_cause) > -1) {
+          if (seen.includes(_cause)) {
             cause = { cause: '(Circular:StrippedOut)' }
           } else {
             cause = { cause: _objectToJson(_cause, seen, maxDepth - 1, options) }
@@ -130,17 +130,12 @@ function _objectToJson(
         if ('context' in jsValue) {
           const _context = jsValue.context
           if (_context !== undefined && isJavaScriptValue(_context)) {
-            if (seen.indexOf(_context) > -1) {
-              context = { context: '(Circular:StrippedOut)' }
-            } else {
-              context = { context: _objectToJson(_context, seen, maxDepth - 1, options) }
-            }
+            context = { context: _objectToJson(_context, seen, maxDepth - 1, options) }
           }
         }
         return { __errorType: jsValue.constructor.name, message: jsValue.message, stack, ...cause, ...context }
       } else if (jsValue instanceof Map) {
         const obj: { [key: string]: Json } = {}
-        seen.push(jsValue)
         for (const [key, value] of jsValue.entries()) {
           const jsonKey = _objectToJson(key, seen, maxDepth - 1, options)
           const stringKey = typeof jsonKey === 'string' ? jsonKey : JSON.stringify(jsonKey)
@@ -163,14 +158,13 @@ function _objectToJson(
         if (keys.length === 0) {
           return jsValue as { [key: string]: Json }
         }
-        seen.push(jsValue)
         const obj: { [key: string]: Json } = {}
         for (const key of keys.slice(0, options.maxObjectSize)) {
           const value = jsValue[key]
           if (typeof value === 'undefined') {
             obj[key] = '(undefined)'
           } else {
-            if (seen.indexOf(value) > -1) {
+            if (seen.includes(value)) {
               obj[key] = '(Circular:StrippedOut)'
             } else {
               obj[key] = _objectToJson(value, seen, maxDepth - 1, options)
@@ -186,9 +180,11 @@ function _objectToJson(
     case 'function':
       return jsValue.toString()
   }
+  /* istanbul ignore next */
   return assertUnreachable(jsValue, 'Unknown JavaScript type')
 }
 
+/* istanbul ignore next */
 function assertUnreachable(x: never, message: string): never {
   throw new Error(`${message}: ${JSON.stringify(x)} type: ${typeof x}`)
 }

@@ -160,6 +160,52 @@ describe('src/json', () => {
       expect(Array.isArray(output.cause?.stack)).toBe(true)
       expect(output.cause?.stack.length).toBeGreaterThan(0)
     })
+
+    it('should handle Error with circular context', () => {
+      const error = new ErrorWithContext('test error')
+      error.context = { error }
+      const output = objectToJson(error) as unknown as ContextErrorJson
+
+      expect(output.message).toBe('test error')
+      expect(output.__errorType).toBe('ErrorWithContext')
+      expect(Array.isArray(output.stack)).toBe(true)
+      expect(output.stack.length).toBeGreaterThan(0)
+      expect(output.context).toEqual({ error: '(Circular:StrippedOut)' })
+    })
+
+    it('should handle Error with undefined context', () => {
+      const error = new ErrorWithContext('test error')
+      error.context = undefined
+      const output = objectToJson(error) as unknown as ContextErrorJson
+
+      expect(output.message).toBe('test error')
+      expect(output.__errorType).toBe('ErrorWithContext')
+      expect(Array.isArray(output.stack)).toBe(true)
+      expect(output.stack.length).toBeGreaterThan(0)
+      expect(output.context).toBeUndefined()
+    })
+
+    it('should handle Error with malformed stack', () => {
+      const error = new Error('test error')
+      error.stack = 'at foo\nat'
+      const output = objectToJson(error) as unknown as ErrorJson
+
+      expect(output.message).toBe('test error')
+      expect(output.__errorType).toBe('Error')
+      expect(Array.isArray(output.stack)).toBe(false)
+      expect(output.stack).toBe('at foo\nat')
+    })
+
+    it('should handle Error with malformed stack at line', () => {
+      const error = new Error('test error')
+      error.stack = 'Error: \nfoo'
+      const output = objectToJson(error) as unknown as ErrorJson
+
+      expect(output.message).toBe('test error')
+      expect(output.__errorType).toBe('Error')
+      expect(Array.isArray(output.stack)).toBe(false)
+      expect(output.stack).toBe('Error: \nfoo')
+    })
   })
 
   describe('weird cases', () => {
@@ -202,6 +248,33 @@ describe('src/json', () => {
       const longString = 'a'.repeat(1000)
       const output = objectToJson(longString)
       expect(output).toBe('a'.repeat(100) + '...(truncated)')
+    })
+
+    it('should handle circular reference in array', () => {
+      const arr: any[] = []
+      arr.push(arr)
+      const output = objectToJson(arr)
+      expect(output).toEqual(['(Circular:StrippedOut)'])
+    })
+
+    it('should handle too long array', () => {
+      const arr = new Array(1000).fill(0)
+      const output = objectToJson(arr)
+      expect(output).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'truncated...'])
+    })
+
+    it('should handle empty object', () => {
+      const output = objectToJson({})
+      expect(output).toEqual({})
+    })
+
+    it('should handle too long object', () => {
+      const obj: any = {}
+      for (let i = 0; i < 1000; i++) {
+        obj[i] = i
+      }
+      const output = objectToJson(obj)
+      expect(output).toEqual({ ...Object.fromEntries(Object.entries(obj).slice(0, 10)), 'truncated...': true })
     })
   })
 })
