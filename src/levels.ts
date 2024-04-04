@@ -2,6 +2,7 @@ export const logLevels = {
   CRITICAL: 50,
   ERROR: 40,
   WARN: 30,
+  NOTICE: 25,
   INFO: 20,
   STATISTIC: 15,
   DEBUG: 10,
@@ -25,6 +26,8 @@ export function getLogLevelName(logLevel: number): string {
       return 'ERROR'
     case logLevels.WARN:
       return 'WARNING' // Override for stackdriver severity
+    case logLevels.NOTICE:
+      return 'NOTICE'
     case logLevels.INFO:
       return 'INFO'
     case logLevels.STATISTIC:

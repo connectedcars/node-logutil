@@ -64,14 +64,9 @@ function _objectToJson(
   if (maxDepth <= 0) {
     return `(MaxDepth:strippedOut:${typeof jsValue})`
   }
-  if (jsValue === null) {
-    return null
-  }
-  if (jsValue === undefined) {
-    return '(undefined)'
-  }
-
   switch (typeof jsValue) {
+    case 'undefined':
+      return '(undefined)'
     case 'boolean':
       return jsValue
     case 'number': {
@@ -91,6 +86,9 @@ function _objectToJson(
         (jsValue.length > options.maxStringLength ? '...(truncated)' : '')
       )
     case 'object': {
+      if (jsValue === null) {
+        return null
+      }
       seen.push(jsValue)
       if (Array.isArray(jsValue)) {
         if (jsValue.length === 0) {
@@ -179,9 +177,10 @@ function _objectToJson(
     }
     case 'function':
       return jsValue.toString()
+    default: {
+      assertUnreachable(jsValue, 'Unknown JavaScript type')
+    }
   }
-  /* istanbul ignore next */
-  return assertUnreachable(jsValue, 'Unknown JavaScript type')
 }
 
 /* istanbul ignore next */
