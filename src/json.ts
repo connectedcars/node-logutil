@@ -22,31 +22,43 @@ export function objectToJson(
   options: Partial<ObjectToJsonOptions> & { maxDepth?: number } = {}
 ): Json {
   const seen: JavaScriptValue[] = []
-  const maxStringLength =
-    options.maxStringLength !== undefined
-      ? options.maxStringLength
-      : process.env.JSON_MAX_STRING_LENGTH !== undefined
-      ? parseInt(process.env.JSON_MAX_STRING_LENGTH)
-      : 100
-  const maxArrayLength =
-    options.maxArrayLength !== undefined
-      ? options.maxArrayLength
-      : process.env.JSON_MAX_ARRAY_LENGTH !== undefined
-      ? parseInt(process.env.JSON_MAX_ARRAY_LENGTH)
-      : 10
-  const maxObjectSize =
-    options.maxObjectSize !== undefined
-      ? options.maxObjectSize
-      : process.env.JSON_MAX_OBJECT_SIZE !== undefined
-      ? parseInt(process.env.JSON_MAX_OBJECT_SIZE)
-      : 10
-  const maxDepth =
-    options.maxDepth !== undefined
-      ? options.maxDepth
-      : process.env.JSON_MAX_DEPTH !== undefined
-      ? parseInt(process.env.JSON_MAX_DEPTH)
-      : 10
+  const maxStringLength = paramEnvOrDefault(options.maxStringLength, 'JSON_MAX_STRING_LENGTH', 100, intFromEnv)
+  const maxArrayLength = paramEnvOrDefault(options.maxArrayLength, 'JSON_MAX_ARRAY_LENGTH', 10, intFromEnv)
+  const maxObjectSize = paramEnvOrDefault(options.maxObjectSize, 'JSON_MAX_OBJECT_SIZE', 10, intFromEnv)
+  const maxDepth = paramEnvOrDefault(options.maxDepth, 'JSON_MAX_DEPTH', 10, intFromEnv)
+
   return _objectToJson(jsValue, seen, maxDepth, { maxStringLength, maxArrayLength, maxObjectSize })
+}
+
+function intFromEnv(envName: string): number | undefined {
+  const value = process.env[envName]
+  if (value === undefined) {
+    return
+  }
+  const parsed = parseInt(value)
+  if (parsed === -1) {
+    return
+  }
+  return parsed
+}
+
+function paramEnvOrDefault<T>(
+  param: T | undefined,
+  env: string,
+  defaultValue: T,
+  convert: (env: string) => T | undefined
+): T {
+  if (param !== undefined) {
+    return param
+  }
+  const envValue = process.env[env]
+  if (envValue !== undefined) {
+    const converted = convert(envValue)
+    if (converted !== undefined) {
+      return converted
+    }
+  }
+  return defaultValue
 }
 
 interface ObjectToJsonOptions {
@@ -82,6 +94,7 @@ function _objectToJson(
       return `BigInt(${jsValue?.toString()})`
     case 'string':
       return (
+        // escape newlines and truncate to max length
         jsValue.replace(/\n/g, '\\n').substring(0, options.maxStringLength) +
         (jsValue.length > options.maxStringLength ? '...(truncated)' : '')
       )
@@ -131,7 +144,7 @@ function _objectToJson(
             context = { context: _objectToJson(_context, seen, maxDepth - 1, options) }
           }
         }
-        return { __errorType: jsValue.constructor.name, message: jsValue.message, stack, ...cause, ...context }
+        return { __constructorName: jsValue.constructor.name, message: jsValue.message, stack, ...cause, ...context }
       } else if (jsValue instanceof Map) {
         const obj: { [key: string]: Json } = {}
         for (const [key, value] of jsValue.entries()) {
@@ -157,6 +170,17 @@ function _objectToJson(
           return jsValue as { [key: string]: Json }
         }
         const obj: { [key: string]: Json } = {}
+
+        //handle class and add class name, but not for anonymous objects
+        if (
+          'constructor' in jsValue &&
+          typeof jsValue.constructor === 'function' &&
+          'name' in jsValue.constructor &&
+          jsValue.constructor.name !== 'Object'
+        ) {
+          obj.__constructorName = jsValue.constructor.name
+        }
+
         for (const key of keys.slice(0, options.maxObjectSize)) {
           const value = jsValue[key]
           if (typeof value === 'undefined') {

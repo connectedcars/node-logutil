@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { objectToJson } from './json'
+import { JavaScriptValue, objectToJson } from './json'
 
 describe('src/json', () => {
   const sample: any = {
@@ -55,6 +55,16 @@ describe('src/json', () => {
     const sample2 = JSON.parse(json)
     expect(sample2).toEqual(output)
   })
+
+  it('should handle class', () => {
+    const output = objectToJson(new SomeTestClass() as unknown as JavaScriptValue)
+    expect(output).toEqual({
+      __constructorName: 'SomeTestClass',
+      someProperty: 'someProperty',
+      someField: 'someField'
+    })
+  })
+
   describe('Error', () => {
     class HalClientError extends Error {
       public constructor(message?: string) {
@@ -67,7 +77,7 @@ describe('src/json', () => {
     it('should handle Error', () => {
       const output = objectToJson(new Error('test error')) as unknown as ErrorJson
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('Error')
+      expect(output.__constructorName).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeUndefined()
@@ -76,7 +86,7 @@ describe('src/json', () => {
     it('should handle custom error', () => {
       const output = objectToJson(new HalClientError('test error')) as unknown as ErrorJson
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('HalClientError')
+      expect(output.__constructorName).toBe('HalClientError')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeUndefined()
@@ -85,12 +95,12 @@ describe('src/json', () => {
     it('should handle Error with cause', () => {
       const output = objectToJson(new Error('test error', { cause: new Error('cause Error') })) as unknown as ErrorJson
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('Error')
+      expect(output.__constructorName).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeDefined()
       expect(output.cause?.message).toBe('cause Error')
-      expect(output.cause?.__errorType).toBe('Error')
+      expect(output.cause?.__constructorName).toBe('Error')
       expect(Array.isArray(output.cause?.stack)).toBe(true)
       expect(output.cause?.stack.length).toBeGreaterThan(0)
     })
@@ -101,12 +111,12 @@ describe('src/json', () => {
       ) as unknown as ErrorJson
 
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('Error')
+      expect(output.__constructorName).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeDefined()
       expect(output.cause?.message).toBe('cause Error')
-      expect(output.cause?.__errorType).toBe('ParserError')
+      expect(output.cause?.__constructorName).toBe('ParserError')
       expect(Array.isArray(output.cause?.stack)).toBe(true)
       expect(output.cause?.stack.length).toBeGreaterThan(0)
     })
@@ -118,12 +128,12 @@ describe('src/json', () => {
       ) as unknown as ErrorCauseJson
 
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('Error')
+      expect(output.__constructorName).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeDefined()
       expect(output.cause?.error?.message).toBe('cause Error')
-      expect(output.cause?.error?.__errorType).toBe('ParserError')
+      expect(output.cause?.error?.__constructorName).toBe('ParserError')
       expect(Array.isArray(output.cause?.error?.stack)).toBe(true)
       expect(output.cause?.error?.stack.length).toBeGreaterThan(0)
     })
@@ -134,7 +144,7 @@ describe('src/json', () => {
       const output = objectToJson(error) as unknown as ErrorJson
 
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('Error')
+      expect(output.__constructorName).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.cause).toBeDefined()
@@ -150,13 +160,13 @@ describe('src/json', () => {
       ) as unknown as ContextErrorJson
 
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('ErrorWithContext')
+      expect(output.__constructorName).toBe('ErrorWithContext')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.context).toEqual({ foo: 'bar' })
       expect(output.cause).toBeDefined()
       expect(output.cause?.message).toBe('cause Error')
-      expect(output.cause?.__errorType).toBe('ErrorWithContext')
+      expect(output.cause?.__constructorName).toBe('ErrorWithContext')
       expect(Array.isArray(output.cause?.stack)).toBe(true)
       expect(output.cause?.stack.length).toBeGreaterThan(0)
     })
@@ -167,7 +177,7 @@ describe('src/json', () => {
       const output = objectToJson(error) as unknown as ContextErrorJson
 
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('ErrorWithContext')
+      expect(output.__constructorName).toBe('ErrorWithContext')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.context).toEqual({ error: '(Circular:StrippedOut)' })
@@ -179,7 +189,7 @@ describe('src/json', () => {
       const output = objectToJson(error) as unknown as ContextErrorJson
 
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('ErrorWithContext')
+      expect(output.__constructorName).toBe('ErrorWithContext')
       expect(Array.isArray(output.stack)).toBe(true)
       expect(output.stack.length).toBeGreaterThan(0)
       expect(output.context).toBeUndefined()
@@ -191,7 +201,7 @@ describe('src/json', () => {
       const output = objectToJson(error) as unknown as ErrorJson
 
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('Error')
+      expect(output.__constructorName).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(false)
       expect(output.stack).toBe('at foo\nat')
     })
@@ -202,7 +212,7 @@ describe('src/json', () => {
       const output = objectToJson(error) as unknown as ErrorJson
 
       expect(output.message).toBe('test error')
-      expect(output.__errorType).toBe('Error')
+      expect(output.__constructorName).toBe('Error')
       expect(Array.isArray(output.stack)).toBe(false)
       expect(output.stack).toBe('Error: \nfoo')
     })
@@ -280,20 +290,20 @@ describe('src/json', () => {
 })
 
 interface ErrorJson {
-  __errorType: string
+  __constructorName: string
   message: string
   stack: string[]
   cause?: ErrorJson
 }
 
 interface ErrorCauseJson {
-  __errorType: string
+  __constructorName: string
   message: string
   stack: string[]
   cause?: { error: ErrorJson }
 }
 interface ContextErrorJson {
-  __errorType: string
+  __constructorName: string
   message: string
   stack: string[]
   context: { [key: string]: unknown }
@@ -311,5 +321,13 @@ export class ErrorWithContext extends Error {
     super(message, options)
     this.name = this.constructor.name
     this.context = options?.context
+  }
+}
+
+class SomeTestClass {
+  public someProperty = 'someProperty'
+  private someField = 'someField'
+  public someMethod() {
+    return 'someMethod'
   }
 }
