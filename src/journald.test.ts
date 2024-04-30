@@ -26,12 +26,12 @@ describe('src/journald', () => {
     log.error('something', { foo: 'bar' })
     log.critical('something', { foo: 'bar' })
     expect(logStub.args).toEqual([
-      ['<7> something {"foo":"bar"}'],
-      ['<6> something {"foo":"bar"}'],
-      ['<5> something {"foo":"bar"}'],
-      ['<4> something {"foo":"bar"}'],
-      ['<3> something {"foo":"bar"}'],
-      ['<2> something {"foo":"bar"}']
+      ['<7> [DEBUG] something {"foo":"bar"}'],
+      ['<6> [INFO] something {"foo":"bar"}'],
+      ['<5> [NOTICE] something {"foo":"bar"}'],
+      ['<4> [WARNING] something {"foo":"bar"}'],
+      ['<3> [ERROR] something {"foo":"bar"}'],
+      ['<2> [CRITICAL] something {"foo":"bar"}']
     ])
   })
 })

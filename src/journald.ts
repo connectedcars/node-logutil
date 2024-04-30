@@ -1,5 +1,5 @@
 import { JavaScriptValue, objectToJson } from './json'
-import { getLogLevel, logLevels } from './levels'
+import { getLogLevel, getLogLevelName, logLevels } from './levels'
 
 export const journaldLevels = {
   DEBUG: 7,
@@ -47,6 +47,6 @@ export function logJournald(level: number, ...args: unknown[]): void {
       .join(' ')
     const journaldLevel = logLevelToJournaldLevel(level)
     // eslint-disable-next-line no-console
-    console.log(`<${journaldLevel}> ${output}`)
+    console.log(`<${journaldLevel}> [${getLogLevelName(level)}] ${output}`)
   }
 }
