@@ -36,7 +36,7 @@ function intFromEnv(envName: string): number | undefined {
     return
   }
   const parsed = parseInt(value)
-  if (parsed === -1) {
+  if (isNaN(parsed)) {
     return
   }
   return parsed

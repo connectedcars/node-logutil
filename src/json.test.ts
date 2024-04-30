@@ -56,7 +56,7 @@ describe('src/json', () => {
     expect(sample2).toEqual(output)
   })
 
-  it('should handle class', () => {
+  it('should handle a class', () => {
     const output = objectToJson(new SomeTestClass() as unknown as JavaScriptValue)
     expect(output).toEqual({
       __constructorName: 'SomeTestClass',
