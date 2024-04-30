@@ -46,6 +46,7 @@ export function logJournald(level: number, ...args: unknown[]): void {
       })
       .join(' ')
     const journaldLevel = logLevelToJournaldLevel(level)
+    // `<${journaldLevel}> is used by journald to determine log level
     // eslint-disable-next-line no-console
     console.log(`<${journaldLevel}> [${getLogLevelName(level)}] ${output}`)
   }
