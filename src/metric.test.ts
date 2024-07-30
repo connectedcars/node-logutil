@@ -554,6 +554,93 @@ describe('src/metric.js', () => {
       )
     })
 
+    it('emits metrics', () => {
+      // Add an event listener to the metricRegistry
+      const dumpedMetrics: any[] = []
+      metricRegistry.on('foo-metric', metricDump => {
+        dumpedMetrics.push(...metricDump.metrics)
+      })
+      metricRegistry.on('bar-metric', metricDump => {
+        dumpedMetrics.push(...metricDump.metrics)
+      })
+
+      metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
+      metricRegistry.gauge('foo-metric', 2, { brand: 'seat' })
+      metricRegistry.gauge('bar-metric', 20, { brand: 'vw' })
+      metricRegistry.logMetrics()
+
+      expect(logStub.callCount).toEqual(2)
+      expect(logStub.args[0].length).toEqual(1)
+      expect(logStub.args[0][0]).toEqual(
+        JSON.stringify({
+          message: 'Metric dump',
+          context: {
+            metrics: [
+              {
+                name: 'foo-metric',
+                type: 'GAUGE',
+                value: 4,
+                labels: { brand: 'vw' },
+                endTime: '2017-09-01T13:37:42.000Z'
+              },
+              {
+                name: 'foo-metric',
+                type: 'GAUGE',
+                value: 2,
+                labels: { brand: 'seat' },
+                endTime: '2017-09-01T13:37:42.000Z'
+              }
+            ]
+          },
+          severity: 'STATISTIC',
+          timestamp: '2017-09-01T13:37:42.000Z'
+        })
+      )
+
+      expect(logStub.args[1][0]).toEqual(
+        JSON.stringify({
+          message: 'Metric dump',
+          context: {
+            metrics: [
+              {
+                name: 'bar-metric',
+                type: 'GAUGE',
+                value: 20,
+                labels: { brand: 'vw' },
+                endTime: '2017-09-01T13:37:42.000Z'
+              }
+            ]
+          },
+          severity: 'STATISTIC',
+          timestamp: '2017-09-01T13:37:42.000Z'
+        })
+      )
+
+      expect(dumpedMetrics).toEqual([
+        {
+          name: 'foo-metric',
+          type: 'GAUGE',
+          value: 4,
+          labels: { brand: 'vw' },
+          endTime: '2017-09-01T13:37:42.000Z'
+        },
+        {
+          name: 'foo-metric',
+          type: 'GAUGE',
+          value: 2,
+          labels: { brand: 'seat' },
+          endTime: '2017-09-01T13:37:42.000Z'
+        },
+        {
+          name: 'bar-metric',
+          type: 'GAUGE',
+          value: 20,
+          labels: { brand: 'vw' },
+          endTime: '2017-09-01T13:37:42.000Z'
+        }
+      ])
+    })
+
     it('cumulative handles name collision', () => {
       metricRegistry.gauge('foo-metric', 4, { brand: 'vw' })
       metricRegistry.cumulative('foo-metric', 20, { brand: 'vw' })

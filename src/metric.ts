@@ -1,7 +1,9 @@
+import { EventEmitter } from 'events'
+
 import { error } from './error'
 import { statistic } from './statistic'
 
-enum MetricType {
+export enum MetricType {
   GAUGE = 'GAUGE',
   CUMULATIVE = 'CUMULATIVE'
 }
@@ -27,6 +29,8 @@ type Metric = GaugeMetric | CumulativeMetric
 type FilteredMetric = Omit<Metric, 'value'> & { value: number; endTime: number }
 type FormattedMetric = Omit<Metric, 'startTime' | 'endTime'> & { startTime?: string; endTime: string }
 
+type MetricsEvent = { metrics: FormattedMetric[] }
+
 function isGaugeMetric(metric: Metric): metric is GaugeMetric {
   return metric.type === MetricType.GAUGE
 }
@@ -34,7 +38,9 @@ function isCumulativeMetric(metric: Metric): metric is CumulativeMetric {
   return metric.type === MetricType.CUMULATIVE
 }
 
-export class MetricRegistry {
+export class MetricRegistry extends EventEmitter<{
+  [metricName: string]: [MetricsEvent]
+}> {
   private metrics: Record<string, Metric> = {}
 
   public logMetrics(): void {
@@ -56,14 +62,22 @@ export class MetricRegistry {
       }
     }
 
+    for (const [metricName, metrics] of Object.entries(result)) {
+      // Emit each metric name as separate event
+      this.emit(metricName, {
+        metrics
+      })
+    }
+
     for (const metrics of Object.values(result)) {
       while (metrics.length > 0) {
+        const metricsBatch = metrics.splice(0, 250)
         statistic('Metric dump', {
-          metrics: metrics.splice(0, 250)
+          metrics: metricsBatch
         })
       }
     }
-    // After dumping metrics, remove all existing metrics
+    // After dumping and emmiting metrics, remove all existing metrics
     // We don't miss out on any metrics here, because this code is purely synchronous
     this.metrics = {}
   }
@@ -250,5 +264,6 @@ export function clearMetricRegistry(): void {
   if (scrapeInterval) {
     clearTimeout(scrapeInterval)
   }
+  metricRegistry?.removeAllListeners()
   metricRegistry = null
 }
