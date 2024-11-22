@@ -338,6 +338,18 @@ describe('src/format', () => {
     expect(reachedMaxDepth(deepObject)).toEqual(true)
   })
 
+  it('includes the trace context in the output', () => {
+    const output = format(logLevels.WARN, 'something', {
+      trace: 'trace-id',
+      spanId: 'span-id',
+      traceSampled: 'true',
+      otherUselessField: 'useless'
+    })
+    expect(output).toEqual(
+      '{"message":"something","context":{"otherUselessField":"useless"},"trace":"trace-id","spanId":"span-id","traceSampled":"true","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
+    )
+  })
+
   it('stores muliline messages as expected', () => {
     const countQuery = `
       SELECT

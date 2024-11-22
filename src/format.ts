@@ -94,6 +94,17 @@ export function format(level: number, ...args: unknown[]): string {
         if (args[1] instanceof Object) {
           // Set objects as secondary arguments as the context
           output.context = formatContext(args[1] as Record<string, unknown>)
+          // Try to find trace info from context
+          // Based on field in LogEntry: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#FIELDS.trace_sampled
+          if (output.context['spanId'] && output.context['trace'] && output.context['traceSampled']) {
+            output.trace = output.context['trace']
+            output.spanId = output.context['spanId']
+            output.traceSampled = output.context['traceSampled']
+            // We don't need these fields in the context
+            delete output.context['spanId']
+            delete output.context['trace']
+            delete output.context['traceSampled']
+          }
         } else {
           // Set all other types as data
           output.data?.push(args[1])
