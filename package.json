@@ -1,6 +1,6 @@
 {
   "name": "@connectedcars/logutil",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "description": "Simple log formatting for Node",
   "main": "build/dist/src/index.js",
   "engines": {
