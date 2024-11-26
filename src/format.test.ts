@@ -340,13 +340,13 @@ describe('src/format', () => {
 
   it('includes the trace context in the output', () => {
     const output = format(logLevels.WARN, 'something', {
-      trace: 'trace-id',
-      spanId: 'span-id',
-      traceSampled: 'true',
+      spanId: '5909853980582992892',
+      trace: 'bf681a55eda601982a09d5fc777320a9',
+      traceSampled: false,
       otherUselessField: 'useless'
     })
     expect(output).toEqual(
-      '{"message":"something","context":{"otherUselessField":"useless"},"trace":"trace-id","spanId":"span-id","traceSampled":"true","severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","context":{"otherUselessField":"useless"},"trace":"bf681a55eda601982a09d5fc777320a9","spanId":"5909853980582992892","traceSampled":false,"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
 
