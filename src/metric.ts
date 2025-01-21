@@ -29,8 +29,6 @@ type Metric = GaugeMetric | CumulativeMetric
 type FilteredMetric = Omit<Metric, 'value'> & { value: number; endTime: number }
 type FormattedMetric = Omit<Metric, 'startTime' | 'endTime'> & { startTime?: string; endTime: string }
 
-type MetricsEvent = { metrics: FormattedMetric[] }
-
 function isGaugeMetric(metric: Metric): metric is GaugeMetric {
   return metric.type === MetricType.GAUGE
 }
@@ -38,9 +36,7 @@ function isCumulativeMetric(metric: Metric): metric is CumulativeMetric {
   return metric.type === MetricType.CUMULATIVE
 }
 
-export class MetricRegistry extends EventEmitter<{
-  [metricName: string]: [MetricsEvent]
-}> {
+export class MetricRegistry extends EventEmitter {
   private metrics: Record<string, Metric> = {}
 
   public logMetrics(): void {

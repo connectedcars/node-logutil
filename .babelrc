@@ -1,3 +1,16 @@
 {
-    "extends": "./node_modules/@connectedcars/setup/.babelrc"
+  "extends": "./node_modules/@connectedcars/setup/.babelrc",
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "12"
+        }
+      }
+    ],
+    [
+      "@babel/preset-typescript"
+    ]
+  ]
 }
