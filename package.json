@@ -42,7 +42,7 @@
     "@connectedcars/setup": "^0.18.0",
     "@connectedcars/test": "^0.22.9",
     "@types/jest": "29.2.5",
-    "@types/node": "^20.14.10",
+    "@types/node": "^12.12.6",
     "@typescript-eslint/eslint-plugin": "5.48.0",
     "@typescript-eslint/parser": "5.48.0",
     "babel-jest": "29.3.1",
