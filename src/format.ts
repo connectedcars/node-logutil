@@ -3,6 +3,11 @@ import { getLogLevelName } from './levels'
 const MAX_NESTED_DEPTH = 10
 const MAX_TEXT_LENGTH = 70 * 1024
 
+//https://github.com/googleapis/nodejs-logging/blob/9d1d480406c4d1526c8a7fafd9b18379c0c7fcea/src/entry.ts#L45-L47
+export const SPAN_ID_KEY = 'logging.googleapis.com/spanId'
+export const TRACE_KEY = 'logging.googleapis.com/trace'
+export const TRACE_SAMPLED_KEY = 'logging.googleapis.com/trace_sampled'
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function reachedMaxDepth(obj: any, level = 0): boolean {
   for (const key in obj) {
@@ -97,9 +102,9 @@ export function format(level: number, ...args: unknown[]): string {
           // Try to find trace info from context
           // Based on field in LogEntry: https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#FIELDS.trace_sampled
           if (output.context['spanId'] && output.context['trace']) {
-            output.trace = output.context['trace']
-            output.spanId = output.context['spanId']
-            output.traceSampled = output.context['traceSampled'] ?? false
+            output[TRACE_KEY] = output.context['trace']
+            output[SPAN_ID_KEY] = output.context['spanId']
+            output[TRACE_SAMPLED_KEY] = output.context['traceSampled'] ?? false
             // We don't need these fields in the context
             delete output.context['spanId']
             delete output.context['trace']

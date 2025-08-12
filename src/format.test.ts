@@ -346,7 +346,7 @@ describe('src/format', () => {
       otherUselessField: 'useless'
     })
     expect(output).toEqual(
-      '{"message":"something","context":{"otherUselessField":"useless"},"trace":"bf681a55eda601982a09d5fc777320a9","spanId":"5909853980582992892","traceSampled":false,"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
+      '{"message":"something","context":{"otherUselessField":"useless"},"logging.googleapis.com/trace":"bf681a55eda601982a09d5fc777320a9","logging.googleapis.com/spanId":"5909853980582992892","logging.googleapis.com/trace_sampled":false,"severity":"WARNING","timestamp":"2017-09-01T13:37:42.000Z"}'
     )
   })
 
