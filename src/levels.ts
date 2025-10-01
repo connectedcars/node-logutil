@@ -9,6 +9,10 @@ export const logLevels = {
   TRACE: 5
 }
 
+export type LogLevel = keyof typeof logLevels
+
+export type LogLevelMethod = Lowercase<LogLevel>
+
 export function getLogLevel(): number {
   let logLevel = process.env.LOG_LEVEL || ''
   logLevel = logLevel.toUpperCase()

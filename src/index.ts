@@ -24,6 +24,8 @@ export {
 
 export type { MetricType }
 
+export type { LogLevel, LogLevelMethod } from './levels'
+
 // eslint-disable-next-line no-restricted-syntax
 export default {
   trace,
