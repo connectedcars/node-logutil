@@ -22,7 +22,7 @@ export {
   warn
 }
 
-export type { MetricType }
+export { MetricType }
 
 export type { LogLevel, LogLevelMethod } from './levels'
 
